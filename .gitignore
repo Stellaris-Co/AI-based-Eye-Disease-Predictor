@@ -37,6 +37,6 @@ Thumbs.db
 classes.txt
 __MACOSX/
 
-.run_backend.bat
-.run_frontend.bat
-.run_diagnostics.bat
+run_backend.bat
+run_frontend.bat
+run_diagnostics.bat

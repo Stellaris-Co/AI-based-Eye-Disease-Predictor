@@ -7,7 +7,7 @@ A full-stack AI-powered application for detecting **6 types of eye diseases** us
 ## 🚀 Features
 
 ### 🧠 AI Model  
-- Trained on **2,500+ medical eye images**  
+- Trained on **3,500+ medical eye images**  
 - Detects: Cataract, Uveitis, Conjunctivitis, and more  
 - High accuracy with EfficientNetB3 architecture  
 
