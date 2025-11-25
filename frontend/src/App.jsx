@@ -103,7 +103,7 @@ function App() {
     if (!result) return;
     const doc = new jsPDF();
     const brandColor = [0, 77, 153]; 
-    const accentColor = [240, 248, 255]; 
+    const accentColor = [240, 248, 255];
     
     const addHeader = (pageTitle) => {
         doc.setFillColor(...brandColor);
@@ -124,7 +124,7 @@ function App() {
         doc.text("Disclaimer: AI screening tool only. Consult a specialist for confirmation.", 105, 285, { align: "center" });
         doc.text(`Page ${pageNumber}`, 200, 285, { align: "right" });
     };
-  
+
     addHeader("Patient Report");
     
     doc.setTextColor(0, 0, 0);
@@ -141,44 +141,47 @@ function App() {
             ['Itchiness', itch],
             ['Halos / Glare', halos],
             ['Discharge', discharge],
-            ['Light Sensitivity', lightSens]
+            ['Light Sensitivity', lightSens],
+            ['Floaters / Spots', spots]
         ],
         theme: 'grid',
         headStyles: { fillColor: [100, 100, 100] },
         styles: { fontSize: 10 }
     });
 
+    const diagnosisY = doc.lastAutoTable.finalY + 15;
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text("2. AI Diagnostic Result", 15, 115);
+    doc.text("2. AI Diagnostic Result", 15, diagnosisY);
 
     doc.setDrawColor(0);
     doc.setFillColor(...accentColor);
-    doc.roundedRect(15, 120, 180, 30, 3, 3, 'F');
+    doc.roundedRect(15, diagnosisY + 5, 180, 35, 3, 3, 'F');
     
     doc.setFontSize(16);
     doc.setTextColor(...brandColor);
-    doc.text(result.diagnosis.toUpperCase().replace(/_/g, ' '), 25, 135);
+    doc.text(result.diagnosis.toUpperCase().replace(/_/g, ' '), 25, diagnosisY + 20);
     
     doc.setFontSize(10);
     doc.setTextColor(50, 50, 50);
-    doc.text(`Confidence Score: ${result.confidence.toFixed(1)}%`, 25, 142);
-    doc.text(`Severity Level: ${result.details.severity}`, 120, 142);
+    doc.text(`Confidence Score: ${result.confidence.toFixed(1)}%`, 25, diagnosisY + 30);
+    doc.text(`Severity Level: ${result.details.severity}`, 25, diagnosisY + 35); 
 
+    const imagingY = diagnosisY + 50;
     doc.setFontSize(12);
     doc.setTextColor(0,0,0);
     doc.setFont("helvetica", "bold");
-    doc.text("3. Diagnostic Imaging", 15, 165);
+    doc.text("3. Diagnostic Imaging", 15, imagingY);
 
     try {
         if (preview) {
-            doc.addImage(preview, 'JPEG', 15, 170, 80, 80);
+            doc.addImage(preview, 'JPEG', 15, imagingY + 5, 80, 80);
             doc.setFontSize(9);
-            doc.text("Patient Scan", 55, 255, {align: 'center'});
+            doc.text("Patient Scan", 55, imagingY + 90, {align: 'center'});
         }
         if (heatmap) {
-            doc.addImage(heatmap, 'JPEG', 110, 170, 80, 80);
-            doc.text("AI Attention Heatmap (Grad-CAM)", 150, 255, {align: 'center'});
+            doc.addImage(heatmap, 'JPEG', 110, imagingY + 5, 80, 80);
+            doc.text("AI Attention Heatmap (Grad-CAM)", 150, imagingY + 90, {align: 'center'});
         }
     } catch (e) { console.log("Image add error", e); }
 
@@ -240,7 +243,7 @@ function App() {
     let yPos = 45;
 
     if (result.hybrid_warnings && result.hybrid_warnings.length > 0) {
-        doc.setFillColor(255, 235, 238); // Red background
+        doc.setFillColor(255, 235, 238);
         doc.rect(15, yPos, 180, 25 + (result.hybrid_warnings.length * 5), 'F');
         doc.setTextColor(200, 0, 0);
         doc.setFontSize(14);
@@ -273,7 +276,7 @@ function App() {
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     const mapUrl = "https://www.google.com/maps/search/ophthalmologist+near+me";
-    doc.textWithLink("📍 CLICK HERE TO OPEN GOOGLE MAPS", 25, yPos + 40, { url: mapUrl });
+    doc.textWithLink("CLICK HERE TO OPEN GOOGLE MAPS", 25, yPos + 40, { url: mapUrl });
 
     addFooter(3);
 
@@ -329,12 +332,13 @@ function App() {
                     </div>
                 )}
 
-                {/* UPDATED SYMPTOM QUESTIONNAIRE */}
+                {/* UPDATED SYMPTOM QUESTIONNAIRE (FIXED VISIBILITY) */}
                 {preview && !result && (
                     <div className="p-4 mt-6 space-y-4 border border-blue-100 bg-blue-50 rounded-xl animate-fade-in">
                         <h3 className="flex items-center gap-2 font-bold text-blue-900"><HelpCircle className="w-4 h-4"/> Patient Check</h3>
                         
                         <div className="grid grid-cols-2 gap-4">
+                            {/* Basic */}
                             <div>
                                 <label className="block mb-1 text-xs font-bold text-slate-500">Pain Level</label>
                                 <select value={pain} onChange={(e) => setPain(e.target.value)} className="w-full p-2 text-sm border rounded">
@@ -347,6 +351,8 @@ function App() {
                                     <option>No</option><option>Yes</option><option>Not Sure</option>
                                 </select>
                             </div>
+
+                            {/* Advanced (Fixed visibility) */}
                             <div>
                                 <label className="block mb-1 text-xs font-bold text-slate-500">Itchy?</label>
                                 <select value={itch} onChange={(e) => setItch(e.target.value)} className="w-full p-2 text-sm border rounded">
@@ -357,6 +363,26 @@ function App() {
                                 <label className="block mb-1 text-xs font-bold text-slate-500">Discharge?</label>
                                 <select value={discharge} onChange={(e) => setDischarge(e.target.value)} className="w-full p-2 text-sm border rounded">
                                     <option>None</option><option>Watery</option><option>Thick/Yellow</option><option>Not Sure</option>
+                                </select>
+                            </div>
+                            
+                            {/* NEW FIELDS ADDED */}
+                            <div>
+                                <label className="block mb-1 text-xs font-bold text-slate-500">Halos / Glare?</label>
+                                <select value={halos} onChange={(e) => setHalos(e.target.value)} className="w-full p-2 text-sm border rounded">
+                                    <option>No</option><option>Yes</option><option>Not Sure</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block mb-1 text-xs font-bold text-slate-500">Light Sensitive?</label>
+                                <select value={lightSens} onChange={(e) => setLightSens(e.target.value)} className="w-full p-2 text-sm border rounded">
+                                    <option>No</option><option>Yes</option><option>Not Sure</option>
+                                </select>
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block mb-1 text-xs font-bold text-slate-500">Seeing Spots/Floaters?</label>
+                                <select value={spots} onChange={(e) => setSpots(e.target.value)} className="w-full p-2 text-sm border rounded">
+                                    <option>No</option><option>Yes</option><option>Not Sure</option>
                                 </select>
                             </div>
                         </div>
