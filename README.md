@@ -2,8 +2,8 @@
 
 [![Python Version](https://img.shields.io/badge/Python-3.10+-blue.svg)]()
 [![Node Version](https://img.shields.io/badge/Node.js-18+-green.svg)]()
-[![Stars](https://img.shields.io/github/stars/AkashKundu114/OpthalmoAI.svg?style=social)]()
-[![Forks](https://img.shields.io/github/forks/AkashKundu114/OpthalmoAI.svg?style=social)]()
+[![Stars](https://img.shields.io/github/stars/AkashKundu114/Eye-Disease-AI-Diagnosis.svg?style=social)]()
+[![Forks](https://img.shields.io/github/forks/AkashKundu114/Eye-Disease-AI-Diagnosis.svg?style=social)]()
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)]()
 
 ---
