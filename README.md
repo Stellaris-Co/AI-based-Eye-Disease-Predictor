@@ -78,11 +78,41 @@ npm run dev
 
 ## 📂 Project Structure
 ```
-backend/  
-frontend/  
-scripts/  
-models/  
-dataset/
+EyeDiseaseAI/
+│
+├── backend/                  
+│   ├── main.py               # FastAPI entry + inference pipeline
+│   ├── medical_data.py       # Symptom rules + treatment info
+│   ├── requirements.txt      
+│   └── __init__.py
+│
+├── frontend/                 
+│   ├── src/                  # React components & UI logic
+│   ├── public/               
+│   ├── tailwind.config.js    
+│   └── package.json          
+│
+├── models/                  
+│   ├── router.pth
+│   ├── specialist_anterior.pth
+│   ├── specialist_surface.pth
+│   └── specialist_eyelid.pth
+│
+├── dataset/                  
+│   ├── Adnexal Oculoplastic/
+│   ├── Anterior Segment Pathology/
+│   └── Ocular Surface Disorders/
+│
+└── scripts/                  
+    ├── check_setup.py        
+    ├── explore_data.py       
+    ├── verify_dataset.py     
+    ├── train_router.py       
+    ├── train_anterior.py     
+    ├── train_surface.py      
+    ├── train_eyelid.py       
+    └── run_hierarchial.py    
+
 ```
 
 ---
@@ -90,85 +120,81 @@ dataset/
 ## 📊 Architecture Diagram
 ```mermaid
 flowchart TD
+    %% --- FRONTEND LAYER ---
+    subgraph Frontend["FRONTEND (React + Vite)"]
+        UI[User Interface]
+        
+        subgraph Input_Modules["Input Modules"]
+            UPLOAD[Image Upload]
+            WEBCAM[Webcam Capture]
+            CROP[Image Cropper]
+            FORM[Symptom Form]
+        end
+        
+        subgraph Output_Modules["Output Modules"]
+            DASH[Dashboard UI]
+            PDF[PDF Generator]
+            TTS[Text-to-Speech]
+            MAP[Google Maps API]
+        end
 
-%% ============================================
-%% FRONTEND SYSTEM
-%% ============================================
-subgraph FRONTEND React Vite Tailwind
-    FE1[User Interface]
-    FE2[Image Upload Module]
-    FE3[Webcam Capture Module]
-    FE4[Prediction Dashboard Results]
+        UI --> Input_Modules
+        Input_Modules -->|Image + Symptoms| API_REQ[HTTP POST Request]
+        API_RES[JSON Response] --> DASH
+        DASH --> PDF
+        DASH --> TTS
+        DASH --> MAP
+    end
 
-    FE1 --> FE2
-    FE1 --> FE3
-    FE2 --> API
-    FE3 --> API
-end
+    %% --- BACKEND LAYER ---
+    subgraph Backend["BACKEND (FastAPI + Python)"]
+        API_GATE[API Gateway]
+        VAL[Validation Layer]
+        
+        subgraph Logic_Engine["Logic Engine"]
+            PRE[Preprocessing Resize/Norm]
+            HYBRID[Hybrid Diagnostic Logic]
+            XAI[Grad-CAM Generator]
+        end
 
-%% ============================================
-%% API GATEWAY AND ROUTING
-%% ============================================
-API[FastAPI Main Router]
-API --> VR[Validation and Request Parser]
-VR --> BE
+        subgraph AI_Brain["Hierarchical AI System"]
+            ROUTER[Router Model MobileNetV3]
+            
+            subgraph Specialists["Specialist Models (EfficientNetB3)"]
+                S1[Surface Specialist]
+                S2[Anterior Specialist]
+                S3[Eyelid/Adnexal Specialist]
+            end
+        end
 
-%% ============================================
-%% BACKEND PROCESSING LAYERS
-%% ============================================
-subgraph BACKEND FastAPI Server
-    BE[Application Controller]
-    BP[Image Preprocessing Resize Normalize]
-    BE --> BP
-    BP --> MS
-end
+        API_REQ --> API_GATE
+        API_GATE --> VAL
+        VAL --> PRE
+        PRE --> ROUTER
+        
+        ROUTER -->|Group 0| S3
+        ROUTER -->|Group 1| S2
+        ROUTER -->|Group 2| S1
+        
+        S1 & S2 & S3 --> HYBRID
+        S1 & S2 --> XAI
+        
+        HYBRID --> FINAL[Final Diagnosis Object]
+        XAI --> HEATMAP[Heatmap Base64]
+        
+        FINAL & HEATMAP --> API_RES
+    end
 
-%% ============================================
-%% MODEL SERVICE
-%% ============================================
-subgraph MODEL SERVICE PyTorch
-    MS[Model Loader EfficientNetB3]
-    MI[Inference Forward Pass]
-    MP[Softmax Output Six Classes]
-    MS --> MI --> MP
-end
+    %% --- DEPLOYMENT LAYER ---
+    subgraph Deployment["CLOUD INFRASTRUCTURE"]
+        NETLIFY[Netlify Frontend Host]
+        RENDER[Render Backend Host]
+        GITHUB[GitHub Repo]
+    end
 
-MP --> RESP
-
-%% ============================================
-%% RESPONSE HANDLING
-%% ============================================
-RESP[JSON Response Prediction Confidence]
-RESP --> FE4
-
-%% ============================================
-%% TRAINING AND DATA PIPELINE
-%% ============================================
-subgraph TRAINING PIPELINE
-    DS[Dataset Folder Eye Images]
-    DA[Data Augmentation Flip Rotate Color Adjust]
-    DL[Data Loader Train Validation Split]
-    TM[Training Script train model py]
-    EV[Model Evaluation Metrics]
-    SM[Save Model File models model pth]
-
-    DS --> DA --> DL --> TM --> EV --> SM
-end
-
-%% BACKEND LOADS TRAINED MODEL
-SM --> MS
-
-%% ============================================
-%% STORAGE SYSTEM
-%% ============================================
-subgraph STORAGE
-    ST1[Model Files model pth]
-    ST2[Dataset Local or External]
-    ST3[Training Logs and Metrics]
-end
-
-SM --> ST1
-DS --> ST2
-EV --> ST3
+    Frontend -.-> NETLIFY
+    Backend -.-> RENDER
+    GITHUB --> NETLIFY
+    GITHUB --> RENDER
 ```
 
