@@ -19,8 +19,6 @@ frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
 
-backend/requirements.txt
-
 dataset/
 
 scripts/train_surface.py
