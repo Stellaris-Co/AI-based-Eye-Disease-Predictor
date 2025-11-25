@@ -87,7 +87,7 @@ dataset/
 
 ---
 
-## 📊 Model Architecture Diagram (Mermaid)
+## 📊 Architecture Diagram
 ```mermaid
 flowchart TD
 
