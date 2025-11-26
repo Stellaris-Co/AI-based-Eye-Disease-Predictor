@@ -5,6 +5,3 @@ pillow
 numpy
 grad-cam
 opencv-python-headless
-
-torch --index-url https://download.pytorch.org/whl/cpu
-torchvision --index-url https://download.pytorch.org/whl/cpu
