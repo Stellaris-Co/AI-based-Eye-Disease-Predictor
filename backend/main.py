@@ -46,17 +46,20 @@ HIERARCHY = {
 ROUTER_MODEL = None
 SPECIALIST_MODELS = {}
 
+# --- VISION-CAPABLE OLLAMA MODELS (support image input) ---
+VISION_MODEL_KEYWORDS = ['llava', 'moondream', 'bakllava', 'vision', 'llava-phi3', 'minicpm-v']
+
 # --- AI DOCTOR SYSTEM PROMPT ---
 OPHTHALMOLOGY_SYSTEM_PROMPT = """You are OphthalmoAI Doctor, a specialized AI medical assistant focused on ophthalmology and eye health education.
 
 Your expertise covers:
-- **Cataract**: Crystalline lens opacification, phacoemulsification, IOL implantation, visual rehabilitation
-- **Conjunctivitis (Pink Eye)**: Viral, bacterial, and allergic types; hygiene, antibiotic vs supportive care
-- **Uveitis**: Uveal tract inflammation, autoimmune associations (RA, lupus), steroid therapy, urgency
-- **Eyelid Conditions**: Stye (Hordeolum), Chalazion, Blepharitis; warm compresses, lid hygiene
-- **Jaundice / Scleral Icterus**: Hyperbilirubinemia warning signs, liver/gallbladder implications
-- **Pterygium**: UV-related fibrovascular growth, surgical excision, conjunctival autograft, UV protection
-- **Normal Eye Health**: 20-20-20 rule, nutrition (lutein, omega-3, Vit A), UV protection, screening schedules
+- Cataract: Crystalline lens opacification, phacoemulsification, IOL implantation, visual rehabilitation
+- Conjunctivitis (Pink Eye): Viral, bacterial, and allergic types; hygiene, antibiotic vs supportive care
+- Uveitis: Uveal tract inflammation, autoimmune associations (RA, lupus), steroid therapy, urgency
+- Eyelid Conditions: Stye (Hordeolum), Chalazion, Blepharitis; warm compresses, lid hygiene
+- Jaundice / Scleral Icterus: Hyperbilirubinemia warning signs, liver/gallbladder implications
+- Pterygium: UV-related fibrovascular growth, surgical excision, conjunctival autograft, UV protection
+- Normal Eye Health: 20-20-20 rule, nutrition (lutein, omega-3, Vit A), UV protection, screening schedules
 
 Response Guidelines:
 1. Be warm, empathetic, and use accessible language — explain medical terms when used
@@ -101,37 +104,53 @@ async def lifespan(app: FastAPI):
 
     if os.path.exists(router_path):
         try:
-            router.load_state_dict(torch.load(router_path, map_location=DEVICE, weights_only=True), strict=False)
+            router.load_state_dict(
+                torch.load(router_path, map_location=DEVICE, weights_only=True),
+                strict=False
+            )
             router.to(DEVICE).eval()
             ROUTER_MODEL = router
             print("✅ Router (MobileNetV3) Loaded.")
         except Exception as e:
             print(f"❌ Router Load Failure: {e}")
     else:
-        print(f"⚠️ Router model not found at {router_path}. Train it first with scripts/train_router.py")
+        print(f"⚠️  Router model not found at {router_path}.")
+        print(f"    Train it first with: python scripts/train_router.py")
 
     # 2. Load Specialists
     for idx, info in HIERARCHY.items():
         classes = info['classes']
         model_path = os.path.join(MODELS_DIR, info['model_file'])
 
+        # Single-class groups use direct pass-through (no separate model needed)
         if len(classes) <= 1:
-            SPECIALIST_MODELS[idx] = {'type': 'direct', 'class': classes[0], 'group_name': info['name']}
-            print(f"✅ Specialist (Adnexal) Setup: Direct Pass.")
+            SPECIALIST_MODELS[idx] = {
+                'type': 'direct',
+                'class': classes[0],
+                'group_name': info['name']
+            }
+            print(f"✅ Specialist ({info['name']}): Direct pass-through.")
             continue
 
         model = build_specialist(len(classes))
 
         if os.path.exists(model_path):
             try:
-                model.load_state_dict(torch.load(model_path, map_location=DEVICE, weights_only=True))
+                model.load_state_dict(
+                    torch.load(model_path, map_location=DEVICE, weights_only=True)
+                )
                 model.to(DEVICE).eval()
-                SPECIALIST_MODELS[idx] = {'type': 'model', 'model': model, 'classes': classes, 'group_name': info['name']}
+                SPECIALIST_MODELS[idx] = {
+                    'type': 'model',
+                    'model': model,
+                    'classes': classes,
+                    'group_name': info['name']
+                }
                 print(f"✅ Specialist ({info['name']}) Loaded.")
             except Exception as e:
                 print(f"❌ Specialist Load Failure for {info['name']}: {e}")
         else:
-            print(f"⚠️ Specialist Model Missing: {info['model_file']}")
+            print(f"⚠️  Specialist Model Missing: {info['model_file']}")
 
     yield
 
@@ -169,18 +188,18 @@ class ChatRequest(BaseModel):
 #  HELPER: SYMPTOM ANALYSIS
 # ─────────────────────────────────────────────────────────────────
 def analyze_symptoms(diagnosis: str, pain_level: str, vision_loss: str, itchiness: str) -> List[str]:
-    warnings = []
+    alerts = []  # renamed from 'warnings' to avoid shadowing stdlib name
     if diagnosis == "Conjunctivitis" and pain_level == "Severe":
-        warnings.append("⚠️ Pain Mismatch: Severe pain is unusual for Pink Eye. Rule out Glaucoma or Keratitis.")
+        alerts.append("⚠️ Pain Mismatch: Severe pain is unusual for Pink Eye. Rule out Glaucoma or Keratitis.")
     if vision_loss == "Yes" and diagnosis in ["Conjunctivitis", "Eyelid"]:
-        warnings.append("⚠️ Vision Loss Warning: Surface/Eyelid conditions rarely affect vision. Consider Keratitis or Uveitis.")
+        alerts.append("⚠️ Vision Loss Warning: Surface/Eyelid conditions rarely affect vision. Consider Keratitis or Uveitis.")
     if itchiness == "Yes" and diagnosis == "Conjunctivitis":
-        warnings.append("✅ Symptom Match: Itchiness strongly supports Allergic Conjunctivitis.")
+        alerts.append("✅ Symptom Match: Itchiness strongly supports Allergic Conjunctivitis.")
     if diagnosis == "Jaundice":
-        warnings.append("🚨 URGENT: Scleral Icterus is a systemic emergency. Seek immediate internal medicine evaluation.")
+        alerts.append("🚨 URGENT: Scleral Icterus is a systemic emergency. Seek immediate internal medicine evaluation.")
     if diagnosis == "Uveitis" and pain_level in ["Mild", "Severe"]:
-        warnings.append("🚨 URGENT: Uveitis with pain is sight-threatening. Seek ophthalmologist immediately.")
-    return warnings
+        alerts.append("🚨 URGENT: Uveitis with pain is sight-threatening. Seek ophthalmologist immediately.")
+    return alerts
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -188,8 +207,15 @@ def analyze_symptoms(diagnosis: str, pain_level: str, vision_loss: str, itchines
 # ─────────────────────────────────────────────────────────────────
 @app.get("/")
 def read_root():
-    chat_backend = "Anthropic Claude" if os.getenv("ANTHROPIC_API_KEY") else \
-                   "Ollama Local" if os.getenv("OLLAMA_URL") else "Not Configured"
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
+    ollama_url = os.getenv("OLLAMA_URL", "").strip()
+    if anthropic_key:
+        chat_backend = "Anthropic Claude"
+    elif ollama_url:
+        chat_backend = f"Ollama ({os.getenv('OLLAMA_MODEL', 'llama3.2:3b')})"
+    else:
+        chat_backend = "Not Configured"
+
     return {
         "status": "OphthalmoAI System Ready",
         "device": str(DEVICE),
@@ -212,14 +238,14 @@ async def predict(
     itch: str = Form(...)
 ):
     if ROUTER_MODEL is None:
-        return {"error": "AI diagnostic system offline. Please train and load models first."}
+        return {"error": "AI diagnostic system offline. Train and load models first (see README)."}
 
     try:
         contents = await file.read()
         image = Image.open(io.BytesIO(contents)).convert('RGB')
         input_tensor = preprocess(image).to(DEVICE).unsqueeze(0)
 
-        # STAGE 1: ROUTER
+        # STAGE 1: ROUTER — determines anatomical group
         with torch.no_grad():
             router_out = ROUTER_MODEL(input_tensor)
             router_probs = torch.nn.functional.softmax(router_out[0], dim=0)
@@ -232,11 +258,11 @@ async def predict(
 
         heatmap_base64 = None
 
-        # STAGE 2: DIAGNOSIS
+        # STAGE 2: SPECIALIST DIAGNOSIS
         if spec_data['type'] == 'direct':
+            # Single-class group — no sub-model needed
             diagnosis = spec_data['class']
             confidence = group_conf * 100
-            # FIX: return as 0-1 float consistent with multi-class path
             probs_dict = {diagnosis: 1.0}
 
         else:
@@ -248,15 +274,20 @@ async def predict(
 
             diagnosis = spec_data['classes'][class_idx]
             confidence = probs[class_idx].item() * 100
-            # Probabilities as 0-1 floats (frontend multiplies by 100 for display)
-            probs_dict = {spec_data['classes'][i]: float(probs[i].item()) for i in range(len(spec_data['classes']))}
+            # Return as 0-1 floats; frontend multiplies by 100 for display
+            probs_dict = {
+                spec_data['classes'][i]: float(probs[i].item())
+                for i in range(len(spec_data['classes']))
+            }
 
             # Generate Grad-CAM Heatmap
             try:
                 target_layer = [model_for_cam.features[-1]]
                 cam = GradCAM(model=model_for_cam, target_layers=target_layer)
-                grayscale = cam(input_tensor=input_tensor, targets=[ClassifierOutputTarget(class_idx)])
-
+                grayscale = cam(
+                    input_tensor=input_tensor,
+                    targets=[ClassifierOutputTarget(class_idx)]
+                )
                 rgb_img = np.float32(image.resize((380, 380))) / 255
                 vis = show_cam_on_image(rgb_img, grayscale[0, :], use_rgb=True)
 
@@ -266,7 +297,7 @@ async def predict(
             except Exception as cam_err:
                 print(f"Grad-CAM warning: {cam_err}")
 
-        # STAGE 3: HYBRID SYMPTOM ANALYSIS
+        # STAGE 3: HYBRID SYMPTOM CROSS-CHECK
         hybrid_warnings = analyze_symptoms(diagnosis, pain, vision, itch)
         details = MEDICAL_INFO.get(diagnosis, {}).copy()
 
@@ -288,7 +319,7 @@ async def predict(
             "heatmap": f"data:image/jpeg;base64,{heatmap_base64}" if heatmap_base64 else None,
             "details": details,
             "hybrid_warnings": hybrid_warnings,
-            "probabilities": probs_dict  # 0-1 floats; frontend converts to %
+            "probabilities": probs_dict
         }
 
     except Exception as e:
@@ -296,9 +327,9 @@ async def predict(
         import traceback
         traceback.print_exc()
         return {"error": f"Analysis failed: {str(e)}"}
-        
+
     finally:
-        # Force PyTorch to release GPU memory so LLaVA has room to load
+        # Free GPU memory so Ollama LLM has headroom
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
             gc.collect()
@@ -306,7 +337,7 @@ async def predict(
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
-    """AI Doctor chat using Anthropic Claude or Ollama (local)."""
+    """AI Doctor chat via Anthropic Claude API or local Ollama (llama3.2:3b recommended)."""
 
     # Build system prompt, inject diagnosis context if available
     system = OPHTHALMOLOGY_SYSTEM_PROMPT
@@ -323,21 +354,22 @@ async def chat_endpoint(request: ChatRequest):
             f"Note: This is an AI screening result only, not a clinical diagnosis."
         )
 
+    # Read config — OLLAMA_URL defaults to empty (not configured) unless explicitly set
     anthropic_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
-    ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434").strip() 
-    ollama_model = os.getenv("OLLAMA_MODEL", "moondream").strip() 
+    ollama_url = os.getenv("OLLAMA_URL", "").strip()
+    ollama_model = os.getenv("OLLAMA_MODEL", "llama3.2:3b").strip()
 
     reply = ""
 
     try:
         if anthropic_key:
-            # ── Anthropic Claude ──────────────────────────────────────────
+            # ── Anthropic Claude ──────────────────────────────────────────────
             messages = []
             for msg in request.history:
                 if msg.role in ("user", "assistant"):
                     messages.append({"role": msg.role, "content": msg.content})
             messages.append({"role": "user", "content": request.message})
-            
+
             import anthropic
             client = anthropic.AsyncAnthropic(api_key=anthropic_key)
             response = await client.messages.create(
@@ -349,53 +381,63 @@ async def chat_endpoint(request: ChatRequest):
             reply = response.content[0].text
 
         elif ollama_url:
-            # ── Ollama Local LLM (LLaVA Vision Integration) ───────────────
+            # ── Ollama Local LLM ──────────────────────────────────────────────
+            # Recommended: llama3.2:3b (~2GB VRAM, fits RTX 3050 6GB comfortably)
+            # For vision support use llava variants; llama3.2 is text-only.
             import httpx
-            
-            # Extract base64 image (heatmap) from diagnosis context
-            base64_images = []
-            if request.diagnosis_context and request.diagnosis_context.get('heatmap'):
-                heatmap_data = request.diagnosis_context['heatmap']
-                if "," in heatmap_data:
-                    # Strip the 'data:image/jpeg;base64,' prefix
-                    base64_images.append(heatmap_data.split(",")[1])
+
+            # Only pass heatmap image if the model actually supports vision
+            model_supports_vision = any(
+                kw in ollama_model.lower() for kw in VISION_MODEL_KEYWORDS
+            )
 
             messages = [{"role": "system", "content": system}]
             for msg in request.history:
                 if msg.role in ("user", "assistant"):
                     messages.append({"role": msg.role, "content": msg.content})
-            
-            # Attach the image to the current user message so LLaVA can see it
-            current_msg = {"role": "user", "content": request.message}
-            if base64_images:
-                current_msg["images"] = base64_images
+
+            current_msg: Dict[str, Any] = {"role": "user", "content": request.message}
+
+            # Attach heatmap image only for vision-capable models
+            if model_supports_vision and request.diagnosis_context:
+                heatmap_data = request.diagnosis_context.get('heatmap', '')
+                if heatmap_data and "," in heatmap_data:
+                    current_msg["images"] = [heatmap_data.split(",")[1]]
+
             messages.append(current_msg)
 
             payload = {
                 "model": ollama_model,
                 "messages": messages,
                 "stream": False,
-                "options": {"temperature": 0.7}
+                "options": {
+                    "temperature": 0.7,
+                    "num_gpu": 0  # <--- This forces Ollama to use CPU only
+                }
             }
+
             async with httpx.AsyncClient() as client:
                 resp = await client.post(
                     f"{ollama_url.rstrip('/')}/api/chat",
                     json=payload,
-                    timeout=120.0 # Increased timeout since vision processing takes longer
+                    timeout=120.0
                 )
                 resp.raise_for_status()
                 data = resp.json()
                 reply = data.get("message", {}).get("content", "No response from local model.")
 
         else:
-            # ── No LLM Configured ─────────────────────────────────────────
+            # ── No LLM Configured ─────────────────────────────────────────────
             reply = (
-                "The AI Doctor chat is not configured yet. To enable it:\n\n"
-                "**Ollama Local Vision**\n"
+                "The AI Doctor chat is not configured yet.\n\n"
+                "**Option 1 — Ollama (Free, Local, Recommended for RTX 3050):**\n"
                 "1. Install Ollama from https://ollama.ai\n"
-                "2. Run: `ollama pull llava`\n"
-                "3. Ensure Ollama is running.\n\n"
-                "Once configured, I can analyze your images and answer your questions."
+                "2. Run: `ollama pull llama3.2:3b`\n"
+                "3. Set in .env: `OLLAMA_URL=http://localhost:11434`\n"
+                "4. Set in .env: `OLLAMA_MODEL=llama3.2:3b`\n\n"
+                "**Option 2 — Anthropic Claude (API key required):**\n"
+                "1. Get a key from https://console.anthropic.com\n"
+                "2. Set in .env: `ANTHROPIC_API_KEY=your_key_here`"
             )
 
     except Exception as e:
@@ -404,11 +446,12 @@ async def chat_endpoint(request: ChatRequest):
         traceback.print_exc()
         reply = (
             "I encountered an error processing your message. "
-            "Please check the server logs or try again. "
-            "For urgent eye concerns, please contact an ophthalmologist directly."
+            "Please check that Ollama is running (`ollama serve`) and the model is pulled. "
+            "For urgent eye concerns, contact an ophthalmologist directly."
         )
 
-    return {"reply": reply, "model_used": "anthropic" if anthropic_key else ("ollama" if ollama_url else "none")}
+    model_used = "anthropic" if anthropic_key else ("ollama" if ollama_url else "none")
+    return {"reply": reply, "model_used": model_used}
 
 
 if __name__ == "__main__":
