@@ -31,3 +31,5 @@ models/
 
 run_diagnostics.bat
 start_tunnel.bat
+run_frontend.bat
+run_backend.bat
