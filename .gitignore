@@ -27,7 +27,7 @@ sample/
 *.h5
 *.tflite
 
-models/*
+models/
 
 run_diagnostics.bat
 start_tunnel.bat
