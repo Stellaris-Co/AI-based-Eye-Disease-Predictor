@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Form
+from fastapi import FastAPI, File, UploadFile, Form, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
@@ -26,8 +26,9 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from medical_data import MEDICAL_INFO
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
-MODELS_DIR = os.path.join(project_root, "models")
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+MODELS_DIR = os.getenv("MODELS_DIR", os.path.join(project_root, "models"))
+FORCE_CPU = os.getenv("FORCE_CPU", "false").lower() in {"1", "true", "yes"}
+DEVICE = torch.device("cuda" if torch.cuda.is_available() and not FORCE_CPU else "cpu")
 HIERARCHY = {
     0: {'name': 'Adnexal Oculoplastic', 'model_file': 'specialist_eyelid.pth', 'classes': ['Eyelid']},
     1: {'name': 'Anterior Segment Pathology', 'model_file': 'specialist_anterior.pth', 'classes': ['Cataract', 'Uveitis']},
@@ -129,9 +130,14 @@ async def lifespan(app: FastAPI):
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
 app = FastAPI(lifespan=lifespan, title="OphthalmoAI API", version="2.0.0")
+cors_origins = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", "*").split(",")
+    if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -180,9 +186,19 @@ def read_root():
     }
 
 @app.get("/health")
-
 def health_check():
     return {"ok": True, "device": str(DEVICE)}
+
+@app.get("/ready")
+def readiness_check(response: Response):
+    ready = ROUTER_MODEL is not None
+    if not ready:
+        response.status_code = 503
+    return {
+        "ok": ready,
+        "router_loaded": ready,
+        "specialists_loaded": len(SPECIALIST_MODELS)
+    }
 
 @app.post("/predict")
 async def predict(
@@ -269,7 +285,6 @@ async def predict(
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
-    """AI Doctor chat via Anthropic Claude API or local Ollama (llama3.2:3b recommended)."""
     system = OPHTHALMOLOGY_SYSTEM_PROMPT
     if request.diagnosis_context:
         ctx = request.diagnosis_context
@@ -361,4 +376,9 @@ async def chat_endpoint(request: ChatRequest):
     return {"reply": reply, "model_used": model_used}
 if __name__ == "__main__":
     os.environ.setdefault('OMP_NUM_THREADS', '4')
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=False)
+    uvicorn.run(
+        app,
+        host=os.getenv("HOST", "0.0.0.0"),
+        port=int(os.getenv("PORT", "8000")),
+        reload=False
+    )
