@@ -49,7 +49,7 @@ const ChatBot = ({ diagnosisContext }) => {
     }
   }, [isOpen, isMinimized])
 
-  // Update welcome message when diagnosis changes
+  
   useEffect(() => {
     if (diagnosisContext && messages.length === 1) {
       setMessages([{
@@ -73,7 +73,7 @@ const ChatBot = ({ diagnosisContext }) => {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
       const response = await axios.post(`${apiUrl}/chat`, {
         message: messageText,
-        history: messages.slice(1), // skip greeting
+        history: messages.slice(1), 
         diagnosis_context: diagnosisContext || null
       })
 
@@ -111,7 +111,7 @@ const ChatBot = ({ diagnosisContext }) => {
 
   return (
     <>
-      {/* Floating Button */}
+      
       <button
         onClick={() => { setIsOpen(!isOpen); setIsMinimized(false) }}
         className="fixed z-50 flex items-center justify-center transition-all duration-300 rounded-full shadow-xl bottom-6 right-6 w-14 h-14 hover:scale-110 active:scale-95"
@@ -129,7 +129,7 @@ const ChatBot = ({ diagnosisContext }) => {
         }
       </button>
 
-      {/* Chat Panel */}
+      
       {isOpen && (
         <div
           className="fixed z-50 flex flex-col overflow-hidden border bottom-24 right-6 rounded-2xl"
@@ -141,7 +141,7 @@ const ChatBot = ({ diagnosisContext }) => {
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 173, 181, 0.12)',
           }}
         >
-          {/* Header */}
+          
           <div
             className="flex items-center gap-3 px-4 py-3 shrink-0"
             style={{ background: 'linear-gradient(135deg, #0d2137 0%, #0d4f6e 100%)' }}
@@ -170,7 +170,7 @@ const ChatBot = ({ diagnosisContext }) => {
 
           {!isMinimized && (
             <>
-              {/* Disclaimer */}
+              
               <div className="flex items-start gap-2 px-3 py-2 shrink-0"
                 style={{ background: '#fffbeb', borderBottom: '1px solid #fde68a' }}>
                 <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: '#d97706' }} />
@@ -179,7 +179,7 @@ const ChatBot = ({ diagnosisContext }) => {
                 </p>
               </div>
 
-              {/* Messages */}
+              
               <div className="flex-1 p-4 space-y-3 overflow-y-auto" style={{ background: '#f8fafc' }}>
                 {messages.map((msg, i) => (
                   <div key={i} className={`flex items-end gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
@@ -237,7 +237,7 @@ const ChatBot = ({ diagnosisContext }) => {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Quick Questions */}
+              
               {messages.length <= 2 && !loading && (
                 <div className="px-3 pb-2 shrink-0" style={{ background: '#f8fafc' }}>
                   <div className="flex items-center gap-1.5 mb-1.5">
@@ -261,7 +261,7 @@ const ChatBot = ({ diagnosisContext }) => {
                 </div>
               )}
 
-              {/* Input */}
+              
               <div className="p-3 shrink-0" style={{ background: '#ffffff', borderTop: '1px solid #e2e8f0' }}>
                 <div className="flex gap-2">
                   <textarea
@@ -294,7 +294,7 @@ const ChatBot = ({ diagnosisContext }) => {
                     }
                   </button>
                 </div>
-                {/* FIX: Accurately reflects the actual backend (Claude / Ollama), not "LLaVA Vision AI" */}
+                
                 <p className="text-center text-[9px] mt-1.5" style={{ color: '#94a3b8' }}>
                   Powered by OphthalmoAI · Press Enter to send
                 </p>

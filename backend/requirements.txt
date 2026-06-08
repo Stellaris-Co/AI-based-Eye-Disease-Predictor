@@ -1,34 +1,34 @@
-# ============================================================
-#  OphthalmoAI — Backend Requirements
-#  Python 3.10+  |  RTX 3050 6GB  |  CUDA 12.4
-# ============================================================
 
-# ── Web Framework ────────────────────────────────────────────
+
+
+
+
+
 fastapi>=0.110.0
 uvicorn[standard]>=0.29.0
 python-multipart>=0.0.9
 pydantic>=2.5.0
 starlette>=0.36.0
 
-# ── PyTorch (CUDA) ──────────────────────────────────────────
-# Do NOT install from this file — install manually with CUDA support:
-#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
-# Minimum versions: torch>=2.1.0, torchvision>=0.16.0
 
-# ── Computer Vision ──────────────────────────────────────────
+
+
+
+
+
 pillow>=10.2.0
 numpy>=1.26.0
 opencv-python-headless>=4.9.0
 grad-cam>=1.5.4
 
-# ── LLM Integration ──────────────────────────────────────────
+
 anthropic>=0.25.0
 httpx>=0.27.0
 
-# ── Utilities ────────────────────────────────────────────────
+
 python-dotenv>=1.0.0
 
-# ── Training Only (not needed for inference) ─────────────────
+
 tqdm>=4.66.0
 matplotlib>=3.8.0
 scikit-learn>=1.4.0

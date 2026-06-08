@@ -190,18 +190,14 @@ OphthalmoAI/
 git clone https://github.com/AkashKundu114/Eye-Disease-AI-Diagnosis.git
 cd Eye-Disease-AI-Diagnosis
 
-# Create and activate a virtual environment
 python -m venv venv
-# Windows
 venv\Scripts\activate
-# macOS/Linux
 source venv/bin/activate
 ```
 
 **Install PyTorch with CUDA support first** (do not use requirements.txt for this):
 
 ```bash
-# CUDA 12.4 — check https://pytorch.org/get-started/locally/ for your version
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
 ```
 
@@ -259,20 +255,16 @@ Train all models in sequence. Each saves the best checkpoint automatically.
 
 ```bash
 python scripts/train_router.py
-# Output: models/router.pth
 ```
 
 **Stage 2 — Specialist models** (run in any order; each ~60–120 min on RTX 3050):
 
 ```bash
 python scripts/train_anterior.py
-# Output: models/specialist_anterior.pth
 
 python scripts/train_surface.py
-# Output: models/specialist_surface.pth
 
 python scripts/train_eyelid.py
-# Output: models/specialist_eyelid.pth
 ```
 
 > **Training notes:**
@@ -307,7 +299,6 @@ npm install
 **Create a frontend environment file** (optional — defaults to `http://localhost:8000`):
 
 ```bash
-# frontend/.env.local
 VITE_API_URL=http://localhost:8000
 ```
 
@@ -323,7 +314,6 @@ The app will open at `http://localhost:5173`.
 
 ```bash
 npm run build
-# Output in frontend/dist/
 ```
 
 ---
@@ -333,16 +323,9 @@ npm run build
 Create a `.env` file in the **project root** (next to `backend/`):
 
 ```env
-# ── LLM Chat Backend (choose one) ──────────────────────────────
 
-# Option A: Anthropic Claude (recommended for quality)
-# Get your key at https://console.anthropic.com
 ANTHROPIC_API_KEY=sk-ant-your-key-here
 
-# Option B: Local Ollama (free, no API key required)
-# 1. Install Ollama: https://ollama.ai
-# 2. Pull a model: ollama pull llama3.2:3b
-# 3. Run: ollama serve
 OLLAMA_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.2:3b
 ```
@@ -367,7 +350,6 @@ OLLAMA_MODEL=llama3.2:3b
 **Terminal 1 — Backend:**
 
 ```bash
-# From project root, with venv activated
 python backend/main.py
 ```
 
