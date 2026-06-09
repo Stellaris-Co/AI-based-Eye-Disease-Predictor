@@ -72,7 +72,7 @@ Use this list to verify a complete local setup from scratch.
 | Repository structure defined | Dev | ✅ Done |
 | Python virtual environment + PyTorch install | Dev | ✅ Done |
 | FastAPI skeleton with lifespan + CORS | Dev | ✅ Done |
-| Vite + React + Tailwind setup | Dev | Done |
+| Vite + React + Tailwind setup | Dev | ✅ Done |
 | Docker Compose (backend + frontend) | Dev | ✅ Done |
 | `.gitignore` / `.dockerignore` | Dev | ✅ Done |
 
@@ -85,7 +85,7 @@ Use this list to verify a complete local setup from scratch.
 | `train_router.py` (MobileNetV3, 3 classes) | Dev | ✅ Done |
 | `train_anterior.py` (EfficientNet-B4, 2 classes) | Dev | ✅ Done |
 | `train_surface.py` (EfficientNet-B4, 4 classes) | Dev | ✅ Done |
-| `train_eyelid.py` (single-class helper) | Dev | Done |
+| `train_eyelid.py` (single-class helper) | Dev | ✅ Done |
 | WeightedRandomSampler class balancing | Dev | ✅ Done |
 | AMP mixed precision + gradient accumulation | Dev | ✅ Done |
 
