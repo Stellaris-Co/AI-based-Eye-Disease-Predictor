@@ -152,7 +152,7 @@ MEDICAL_INFO = {
             "Avoid smoking"
         ],
         'severity': "None",
-        'advice': "Your eyes look healthy! Continue scheduling comprehensive eye exams every 1-2 years to detect conditions that are not visible externally (like Glaucoma or Retinal issues)."
+        'advice': "Your eyes look healthy. Keep up routine eye exams every 1-2 years so a doctor can catch issues that are not visible in an external eye photo."
     },
     'Pterygium': {
         'analysis': "A wedge-shaped, fibrovascular growth is visible extending from the nasal conjunctiva onto the cornea. The tissue appears pink and fleshy. It may be encroaching on the visual axis.",

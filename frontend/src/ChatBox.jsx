@@ -57,7 +57,7 @@ const ChatBot = ({ diagnosisContext }) => {
         content: `Hello! I can see your AI screening detected **${diagnosisContext.diagnosis}** with ${diagnosisContext.confidence?.toFixed(1)}% confidence. I'm here to help you understand this result, discuss symptoms, prevention, and next steps. What would you like to know?`
       }])
     }
-  }, [diagnosisContext])
+  }, [diagnosisContext, messages.length])
 
   const sendMessage = async (text) => {
     const messageText = text || input.trim()

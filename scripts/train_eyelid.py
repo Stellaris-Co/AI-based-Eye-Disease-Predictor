@@ -67,7 +67,7 @@ def main():
     sampler = WeightedRandomSampler(weights=[1.0]*len(dataset), num_samples=total_virtual_samples, replacement=True)
     train_loader = DataLoader(dataset, batch_size=BATCH_SIZE, sampler=sampler, num_workers=0, pin_memory=True)
     print(f"⚖️  Training on {total_virtual_samples} virtual samples per epoch.")
-    print(f"⚠️  NOTE: Since 1 class, using MSELoss for placeholder stability.")
+    print("NOTE: Eyelid has one class, so this script uses MSELoss for a stable training run.")
     model = models.efficientnet_b4(weights='DEFAULT')
     for param in model.parameters(): param.requires_grad = True
     model.classifier[1] = nn.Linear(model.classifier[1].in_features, 1)
