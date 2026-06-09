@@ -153,7 +153,7 @@ Use this list to verify a complete local setup from scratch.
 
 | Task | Owner | Status |
 |------|-------|--------|
-| README.md | Dev | Done |
+| README.md | Dev | ✅ Done |
 | PRODUCTION.md | Dev | ✅ Done |
 | `docs/PRD.md` | Dev | ✅ Done |
 | `docs/TRD.md` | Dev | ✅ Done |
