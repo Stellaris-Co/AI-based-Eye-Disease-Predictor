@@ -69,7 +69,7 @@ const SymptomSelect = ({ label, value, setValue, options }) => (
       >
         {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
       </select>
-      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+      <ChevronDown className="absolute w-3 h-3 -translate-y-1/2 pointer-events-none right-2 top-1/2 text-slate-400" />
     </div>
   </div>
 )
@@ -113,39 +113,39 @@ const HomePage = ({ onNavigate }) => (
   <div className="space-y-0">
     {}
     <section className="relative overflow-hidden bg-white border-b border-slate-200">
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full opacity-5"
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute rounded-full -top-40 -right-40 w-96 h-96 opacity-5"
           style={{ background: `radial-gradient(circle, ${ACCENT}, transparent)` }} />
-        <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full opacity-5"
+        <div className="absolute w-64 h-64 rounded-full -bottom-20 -left-20 opacity-5"
           style={{ background: `radial-gradient(circle, ${NAVY}, transparent)` }} />
       </div>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 relative">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div className="relative max-w-6xl px-4 py-20 mx-auto sm:px-6 lg:px-8 sm:py-28">
+        <div className="grid items-center grid-cols-1 gap-16 lg:grid-cols-2">
           <div className="animate-fade-up">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium mb-8"
               style={{ background: '#F0F9FF', color: '#0369A1', border: '1px solid #BAE6FD' }}>
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 block" />
               AI-Powered Ophthalmic Screening
             </div>
-            <h1 className="text-4xl sm:text-5xl font-semibold leading-tight mb-5"
+            <h1 className="mb-5 text-4xl font-semibold leading-tight sm:text-5xl"
               style={{ color: NAVY, fontFamily: 'var(--font-display)', letterSpacing: '-0.03em' }}>
               Advanced Eye Disease<br />
               <span style={{ color: ACCENT }}>Detection & Analysis</span>
             </h1>
-            <p className="text-base text-slate-500 leading-relaxed mb-10 max-w-md">
+            <p className="max-w-md mb-10 text-base leading-relaxed text-slate-500">
               Upload a retinal or ocular scan for instant AI screening across 7 conditions using a
               hierarchical deep learning pipeline with Grad-CAM visual explanations.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 mb-12">
+            <div className="flex flex-col gap-3 mb-12 sm:flex-row">
               <button onClick={() => onNavigate('diagnostic')}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold text-white text-sm transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white transition-colors rounded-lg"
                 style={{ background: ACCENT }}
                 onMouseEnter={e => e.currentTarget.style.background = ACCENT_DARK}
                 onMouseLeave={e => e.currentTarget.style.background = ACCENT}>
                 <ScanEye className="w-4 h-4" /> Start Screening
               </button>
               <button onClick={() => onNavigate('workflow')}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-medium text-sm text-slate-600 transition-colors hover:bg-slate-50"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-medium transition-colors rounded-lg text-slate-600 hover:bg-slate-50"
                 style={{ border: '1px solid #E2E8F0' }}>
                 How it works <ChevronRight className="w-4 h-4" />
               </button>
@@ -173,8 +173,8 @@ const HomePage = ({ onNavigate }) => (
                 { step: '04', label: 'Diagnosis + Report', desc: 'Grad-CAM heatmap · Clinical advice · PDF export', icon: <FileText className="w-4 h-4" /> },
               ].map((item, i) => (
                 <div key={i}>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-white" style={{ border: '1px solid #E2E8F0' }}>
-                    <div className="flex items-center justify-center w-8 h-8 rounded-md flex-shrink-0"
+                  <div className="flex items-center gap-3 p-3 bg-white rounded-lg" style={{ border: '1px solid #E2E8F0' }}>
+                    <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-md"
                       style={{ background: '#F0F9FF', color: ACCENT }}>
                       {item.icon}
                     </div>
@@ -197,8 +197,8 @@ const HomePage = ({ onNavigate }) => (
 
     {}
     <section className="py-12 border-b border-slate-200" style={{ background: '#F8FAFC' }}>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="max-w-6xl px-4 mx-auto sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {[
             { icon: <ScanEye className="w-6 h-6" />, title: 'Diagnostic Tool', desc: 'Upload & analyse eye scans', tab: 'diagnostic', color: '#0891B2', bg: '#F0F9FF' },
             { icon: <GitBranch className="w-6 h-6" />, title: 'How It Works', desc: 'AI pipeline & workflow', tab: 'workflow', color: '#7C3AED', bg: '#F5F3FF' },
@@ -206,11 +206,11 @@ const HomePage = ({ onNavigate }) => (
             { icon: <Newspaper className="w-6 h-6" />, title: 'Medical News', desc: 'Latest eye health research', tab: 'news', color: '#DC2626', bg: '#FEF2F2' },
           ].map((card, i) => (
             <button key={i} onClick={() => onNavigate(card.tab)}
-              className="flex flex-col items-start p-5 rounded-xl bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all text-left group">
+              className="flex flex-col items-start p-5 text-left transition-all bg-white border rounded-xl border-slate-200 hover:border-slate-300 hover:shadow-md group">
               <div className="p-2.5 rounded-lg mb-3 transition-colors" style={{ background: card.bg, color: card.color }}>
                 {card.icon}
               </div>
-              <h3 className="text-sm font-semibold text-slate-800 mb-1">{card.title}</h3>
+              <h3 className="mb-1 text-sm font-semibold text-slate-800">{card.title}</h3>
               <p className="text-xs text-slate-400">{card.desc}</p>
               <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 mt-2 transition-colors" />
             </button>
@@ -221,8 +221,8 @@ const HomePage = ({ onNavigate }) => (
 
     {}
     <section className="py-12 bg-white border-b border-slate-200">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+      <div className="max-w-6xl px-4 mx-auto sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           {[
             { icon: <Zap className="w-5 h-5" />, title: 'Instant Analysis', desc: 'Real-time inference in seconds with GPU-accelerated models.', color: '#F59E0B' },
             { icon: <Target className="w-5 h-5" />, title: 'Symptom Cross-Check', desc: 'Rule-based engine validates AI diagnosis against reported symptoms.', color: ACCENT },
@@ -233,8 +233,8 @@ const HomePage = ({ onNavigate }) => (
                 {f.icon}
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-slate-800 mb-1">{f.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">{f.desc}</p>
+                <h3 className="mb-1 text-sm font-semibold text-slate-800">{f.title}</h3>
+                <p className="text-xs leading-relaxed text-slate-500">{f.desc}</p>
               </div>
             </div>
           ))}
@@ -307,36 +307,36 @@ const WorkflowPage = () => {
   ]
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+    <div className="max-w-6xl px-4 py-12 mx-auto space-y-12 sm:px-6 lg:px-8">
       <div>
-        <p className="section-label mb-2">System Architecture</p>
-        <h2 className="text-2xl font-semibold mb-2" style={{ color: NAVY, fontFamily: 'var(--font-display)' }}>
+        <p className="mb-2 section-label">System Architecture</p>
+        <h2 className="mb-2 text-2xl font-semibold" style={{ color: NAVY, fontFamily: 'var(--font-display)' }}>
           Hierarchical Inference Pipeline
         </h2>
-        <p className="text-sm text-slate-500 max-w-lg">
+        <p className="max-w-lg text-sm text-slate-500">
           OphthalmoAI mirrors clinical ophthalmology practice: a triage (routing) step precedes subspecialist assessment.
         </p>
       </div>
 
       {}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {steps.map((s, i) => (
-          <div key={i} className="p-5 rounded-xl bg-white border border-slate-200 hover:border-slate-300 transition-colors">
+          <div key={i} className="p-5 transition-colors bg-white border rounded-xl border-slate-200 hover:border-slate-300">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 rounded-lg" style={{ background: s.color + '15', color: s.color }}>{s.icon}</div>
               <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Step {String(i + 1).padStart(2, '0')}</span>
             </div>
             <h3 className="text-sm font-semibold mb-1.5" style={{ color: NAVY }}>{s.title}</h3>
-            <p className="text-sm text-slate-500 leading-relaxed mb-2">{s.desc}</p>
+            <p className="mb-2 text-sm leading-relaxed text-slate-500">{s.desc}</p>
             <p className="text-[11px] text-slate-400 font-mono bg-slate-50 px-2 py-1 rounded">{s.detail}</p>
           </div>
         ))}
       </div>
 
       {}
-      <div className="rounded-xl bg-slate-900 p-6 overflow-x-auto">
+      <div className="p-6 overflow-x-auto rounded-xl bg-slate-900">
         <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-4">Model hierarchy</p>
-        <pre className="text-xs text-cyan-400 font-mono leading-relaxed whitespace-pre">{`Input Image (380×380 px)
+        <pre className="font-mono text-xs leading-relaxed whitespace-pre text-cyan-400">{`Input Image (380×380 px)
         │
         ▼
 ┌──────────────────────┐
@@ -362,12 +362,12 @@ const WorkflowPage = () => {
 
       {}
       <div>
-        <h3 className="text-base font-semibold mb-4" style={{ color: NAVY }}>Training Hyperparameters</h3>
-        <div className="rounded-xl border border-slate-200 overflow-hidden bg-white">
+        <h3 className="mb-4 text-base font-semibold" style={{ color: NAVY }}>Training Hyperparameters</h3>
+        <div className="overflow-hidden bg-white border rounded-xl border-slate-200">
           {training.map((row, i) => (
             <div key={i} className={`flex items-center justify-between px-5 py-3 text-sm ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50'} border-b border-slate-100 last:border-0`}>
               <span className="font-medium text-slate-600">{row.param}</span>
-              <span className="text-slate-800 font-mono text-xs">{row.value}</span>
+              <span className="font-mono text-xs text-slate-800">{row.value}</span>
             </div>
           ))}
         </div>
@@ -441,14 +441,14 @@ const ConditionsPage = () => {
   ]
 
   const ConditionCard = ({ c }) => (
-    <div className="p-5 rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer"
+    <div className="p-5 transition-all border cursor-pointer rounded-xl border-slate-200 hover:border-slate-300 hover:shadow-md"
       onClick={() => setSelected(c)}>
       <div className="flex items-center justify-between mb-3">
         <div className="w-2.5 h-2.5 rounded-full" style={{ background: c.color }} />
         <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{c.group}</span>
       </div>
-      <h3 className="text-sm font-semibold mb-1" style={{ color: NAVY }}>{c.name}</h3>
-      <p className="text-xs text-slate-400 leading-relaxed mb-3 line-clamp-2">{c.desc}</p>
+      <h3 className="mb-1 text-sm font-semibold" style={{ color: NAVY }}>{c.name}</h3>
+      <p className="mb-3 text-xs leading-relaxed text-slate-400 line-clamp-2">{c.desc}</p>
       <div className="flex items-center justify-between">
         <SeverityBadge severity={c.severity} />
         <ArrowRight className="w-3.5 h-3.5 text-slate-300" />
@@ -457,18 +457,18 @@ const ConditionsPage = () => {
   )
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-6xl px-4 py-12 mx-auto sm:px-6 lg:px-8">
       <div className="mb-8">
-        <p className="section-label mb-2">Coverage</p>
-        <h2 className="text-2xl font-semibold mb-2" style={{ color: NAVY, fontFamily: 'var(--font-display)' }}>
+        <p className="mb-2 section-label">Coverage</p>
+        <h2 className="mb-2 text-2xl font-semibold" style={{ color: NAVY, fontFamily: 'var(--font-display)' }}>
           7 Conditions, 3 Anatomical Groups
         </h2>
-        <p className="text-sm text-slate-500 max-w-lg">
+        <p className="max-w-lg text-sm text-slate-500">
           Click any condition card for detailed clinical information, symptoms, treatment protocols, and precautions.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {conditions.map((c, i) => <ConditionCard key={i} c={c} />)}
       </div>
 
@@ -478,7 +478,7 @@ const ConditionsPage = () => {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between p-6 border-b border-slate-100">
               <div className="flex items-center gap-3">
-                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: selected.color }} />
+                <div className="flex-shrink-0 w-3 h-3 rounded-full" style={{ background: selected.color }} />
                 <div>
                   <h2 className="text-xl font-semibold" style={{ color: NAVY, fontFamily: 'var(--font-display)' }}>{selected.name}</h2>
                   <div className="flex items-center gap-2 mt-1">
@@ -493,7 +493,7 @@ const ConditionsPage = () => {
               </button>
             </div>
             <div className="p-6 space-y-5">
-              <p className="text-sm text-slate-600 leading-relaxed">{selected.desc}</p>
+              <p className="text-sm leading-relaxed text-slate-600">{selected.desc}</p>
               {[
                 { label: 'Common Symptoms', items: selected.symptoms, icon: <Activity className="w-3.5 h-3.5" />, color: ACCENT },
                 { label: 'Treatment Options', items: selected.treatment, icon: <Pill className="w-3.5 h-3.5" />, color: '#059669' },
@@ -502,24 +502,24 @@ const ConditionsPage = () => {
                 <div key={i}>
                   <div className="flex items-center gap-2 mb-2.5">
                     <span style={{ color: section.color }}>{section.icon}</span>
-                    <h4 className="text-xs font-semibold uppercase tracking-widest text-slate-400">{section.label}</h4>
+                    <h4 className="text-xs font-semibold tracking-widest uppercase text-slate-400">{section.label}</h4>
                   </div>
                   <div className="space-y-1.5">
                     {section.items.map((item, j) => (
                       <div key={j} className="flex items-start gap-2.5 text-sm text-slate-600">
-                        <div className="w-1 h-1 rounded-full flex-shrink-0 mt-2" style={{ background: section.color }} />
+                        <div className="flex-shrink-0 w-1 h-1 mt-2 rounded-full" style={{ background: section.color }} />
                         {item}
                       </div>
                     ))}
                   </div>
                 </div>
               ))}
-              <div className="p-4 rounded-lg border border-cyan-100" style={{ background: '#F0F9FF' }}>
+              <div className="p-4 border rounded-lg border-cyan-100" style={{ background: '#F0F9FF' }}>
                 <div className="flex items-center gap-2 mb-1.5">
                   <Stethoscope className="w-3.5 h-3.5" style={{ color: ACCENT }} />
                   <span className="text-xs font-semibold" style={{ color: '#0369A1' }}>Clinical Note</span>
                 </div>
-                <p className="text-sm text-slate-700 leading-relaxed">{selected.advice}</p>
+                <p className="text-sm leading-relaxed text-slate-700">{selected.advice}</p>
               </div>
             </div>
           </div>
@@ -614,13 +614,13 @@ const MedicalNewsPage = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-6xl px-4 py-12 mx-auto sm:px-6 lg:px-8">
       <div className="mb-8">
-        <p className="section-label mb-2">Latest Research</p>
-        <h2 className="text-2xl font-semibold mb-2" style={{ color: NAVY, fontFamily: 'var(--font-display)' }}>
+        <p className="mb-2 section-label">Latest Research</p>
+        <h2 className="mb-2 text-2xl font-semibold" style={{ color: NAVY, fontFamily: 'var(--font-display)' }}>
           Eye Health & Ophthalmology News
         </h2>
-        <p className="text-sm text-slate-500 max-w-lg">
+        <p className="max-w-lg text-sm text-slate-500">
           Curated highlights from peer-reviewed journals and major ophthalmology publications.
         </p>
       </div>
@@ -665,10 +665,10 @@ const MedicalNewsPage = () => {
                   <span className="flex items-center gap-1 text-xs text-slate-400">
                     <Clock className="w-3 h-3" /> {article.readTime} read
                   </span>
-                  <span className="text-xs text-slate-300 italic">{article.source}</span>
+                  <span className="text-xs italic text-slate-300">{article.source}</span>
                 </div>
-                <h3 className="text-sm font-semibold mb-2 leading-snug" style={{ color: NAVY }}>{article.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed mb-3">{article.summary}</p>
+                <h3 className="mb-2 text-sm font-semibold leading-snug" style={{ color: NAVY }}>{article.title}</h3>
+                <p className="mb-3 text-sm leading-relaxed text-slate-500">{article.summary}</p>
                 <div className="flex flex-wrap items-center gap-2">
                   {article.tags.map((tag, j) => (
                     <span key={j} className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded bg-slate-50 border border-slate-200 text-slate-500">
@@ -682,7 +682,7 @@ const MedicalNewsPage = () => {
         })}
       </div>
 
-      <div className="mt-8 p-4 rounded-xl border border-amber-200 bg-amber-50">
+      <div className="p-4 mt-8 border rounded-xl border-amber-200 bg-amber-50">
         <div className="flex items-start gap-2">
           <Info className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#D97706' }} />
           <p className="text-xs text-amber-700">
@@ -786,302 +786,323 @@ const DiagnosticPage = () => {
   }
 
   const downloadPDF = async () => {
-    if (!result) return
-    const doc = new jsPDF()
-    const brand = [15, 32, 64]
-    const accent = [8, 145, 178]
-    const lightBg = [240, 249, 255]
-    const pageW = 210
-
-    const addHeader = (title, pageNum, totalPages) => {
-      doc.setFillColor(...brand)
-      doc.rect(0, 0, pageW, 28, 'F')
-      doc.setFillColor(...accent)
-      doc.rect(0, 26, pageW, 2, 'F')
-      
-      doc.setTextColor(255, 255, 255)
-      doc.setFontSize(15); doc.setFont('helvetica', 'bold')
-      doc.text('OphthalmoAI', 14, 13)
-      doc.setFontSize(8); doc.setFont('helvetica', 'normal')
-      doc.setTextColor(160, 210, 230)
-      doc.text('Ophthalmic Screening Report', 14, 20)
-      doc.setTextColor(255, 255, 255)
-      doc.setFontSize(8)
-      doc.text(title, pageW - 14, 12, { align: 'right' })
-      doc.text(`Generated: ${new Date().toLocaleString()}`, pageW - 14, 19, { align: 'right' })
-      doc.text(`Page ${pageNum} of ${totalPages}`, pageW - 14, 26, { align: 'right' })
-    }
-
-    const addFooter = () => {
-      doc.setFillColor(248, 250, 252)
-      doc.rect(0, 280, pageW, 17, 'F')
-      doc.setDrawColor(226, 232, 240)
-      doc.line(0, 280, pageW, 280)
-      doc.setTextColor(150); doc.setFontSize(6.5)
-      doc.text('⚕ MEDICAL DISCLAIMER: OphthalmoAI is a research and educational screening tool. It is NOT a substitute for professional medical diagnosis, advice, or treatment.', 14, 285)
-      doc.text('Always consult a qualified ophthalmologist for clinical decisions. This screening report may contain errors.', 14, 290)
-    }
-
-    const sectionTitle = (text, y) => {
-      doc.setFillColor(...lightBg)
-      doc.rect(14, y - 4, pageW - 28, 10, 'F')
-      doc.setDrawColor(...accent)
-      doc.rect(14, y - 4, 3, 10, 'F')
-      doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(...brand)
-      doc.text(text, 20, y + 2)
-      return y + 10
-    }
-
-    
-    addHeader('Clinical Summary — Page 1', 1, 4)
-
-    
-    const isCritical = (result.details.severity || '').toLowerCase().includes('high') || (result.details.severity || '').toLowerCase().includes('emergency')
-    const isNormal = result.diagnosis === 'Normal'
-    const bannerColor = isNormal ? [16, 185, 129] : isCritical ? [220, 38, 38] : [...accent]
-    doc.setFillColor(...bannerColor)
-    doc.roundedRect(14, 35, pageW - 28, 42, 3, 3, 'F')
-    doc.setTextColor(255, 255, 255)
-    doc.setFontSize(22); doc.setFont('helvetica', 'bold')
-    doc.text(result.diagnosis.toUpperCase(), 22, 54)
-    doc.setFontSize(9); doc.setFont('helvetica', 'normal')
-    doc.text(`AI Confidence: ${result.confidence.toFixed(1)}%`, 22, 63)
-    doc.text(`Severity: ${result.details.severity}`, 22, 70)
-    doc.text(`Anatomical Group: ${result.group_name}`, 90, 63)
-    doc.text(`Analysis Date: ${new Date().toLocaleDateString()}`, 90, 70)
-
-    
-    let y = 86
-    if (result.hybrid_warnings?.length > 0) {
-      y = sectionTitle('⚠ AI Clinical Alerts', y)
-      doc.setFillColor(255, 251, 235)
-      doc.roundedRect(14, y, pageW - 28, result.hybrid_warnings.length * 7 + 8, 2, 2, 'F')
-      doc.setDrawColor(245, 158, 11)
-      doc.roundedRect(14, y, pageW - 28, result.hybrid_warnings.length * 7 + 8, 2, 2, 'S')
-      doc.setTextColor(146, 64, 14); doc.setFontSize(8); doc.setFont('helvetica', 'normal')
-      result.hybrid_warnings.forEach((w, i) => {
-        doc.text(`• ${w}`, 18, y + 6 + i * 7)
-      })
-      y += result.hybrid_warnings.length * 7 + 14
-    }
-
-    
-    y = sectionTitle('Patient-Reported Symptoms', y)
-    autoTable(doc, {
-      startY: y,
-      head: [['Symptom', 'Patient Response']],
-      body: [
-        ['Pain Level', pain],
-        ['Vision Blurry / Reduced', vision],
-        ['Itchiness', itch],
-        ['Halos or Glare', halos],
-        ['Eye Discharge', discharge],
-        ['Light Sensitivity (Photophobia)', lightSens],
-        ['Floaters / Dark Spots', spots],
-        ['Duration of Symptoms', duration],
-      ],
-      theme: 'grid',
-      headStyles: { fillColor: brand, fontSize: 8, fontStyle: 'bold' },
-      bodyStyles: { fontSize: 8 },
-      alternateRowStyles: { fillColor: [248, 250, 252] },
-      columnStyles: { 0: { fontStyle: 'bold', cellWidth: 75 } },
-      margin: { left: 14, right: 14 },
-    })
-
-    addFooter()
-
-    
-    doc.addPage()
-    addHeader('Diagnostic Imaging — Page 2', 2, 4)
-
-    y = 40
-    y = sectionTitle('Patient Scan & AI Attention Heatmap (Grad-CAM)', y)
-
-    try {
-      let imgLoaded = 0
-      if (preview) {
-        const b64 = await urlToBase64(preview)
-        doc.addImage(b64, 'JPEG', 14, y, 85, 85)
-        doc.setTextColor(100); doc.setFontSize(7)
-        doc.text('Original Patient Scan', 56, y + 88, { align: 'center' })
-        imgLoaded++
-      }
-      if (heatmap) {
-        doc.addImage(heatmap, 'JPEG', 112, y, 85, 85)
-        doc.setTextColor(100); doc.setFontSize(7)
-        doc.text('AI Attention Heatmap (Grad-CAM)', 154, y + 88, { align: 'center' })
-        imgLoaded++
-      }
-      y += 98
-      if (imgLoaded === 0) {
-        doc.setTextColor(150); doc.setFontSize(9)
-        doc.text('No images available for this scan.', 105, y, { align: 'center' })
-        y += 15
-      }
-    } catch (e) {
-      console.warn('PDF image error:', e)
-      y += 15
-    }
-
-    
-    y = sectionTitle('About Grad-CAM Visualisation', y)
-    doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(80)
-    const gradCamText = 'Gradient-weighted Class Activation Mapping (Grad-CAM) highlights the image regions that most influenced the prediction. Red/warm areas indicate high attention. Use this view as a supporting clue, not as a diagnosis by itself.'
-    const gcLines = doc.splitTextToSize(gradCamText, pageW - 28)
-    doc.text(gcLines, 14, y)
-    y += gcLines.length * 5 + 10
-
-    
-    y = sectionTitle('Differential Diagnosis — AI Confidence Distribution', y)
-    const probs = Object.entries(result.probabilities || {}).sort(([, a], [, b]) => b - a)
-    const barMaxW = 100
-    probs.forEach(([label, prob], i) => {
-      const pct = prob * 100
-      const barW = (pct / 100) * barMaxW
-      const barY = y + i * 14
-      doc.setFillColor(226, 232, 240)
-      doc.roundedRect(60, barY, barMaxW, 7, 1, 1, 'F')
-      const rgb = pct > 55 ? accent : [125, 211, 252]
-      doc.setFillColor(...rgb)
-      doc.roundedRect(60, barY, barW, 7, 1, 1, 'F')
-      doc.setFontSize(7.5); doc.setFont('helvetica', i === 0 ? 'bold' : 'normal'); doc.setTextColor(...brand)
-      doc.text(label.replace(/_/g, ' '), 14, barY + 5.5)
-      doc.setFont('helvetica', 'bold'); doc.setTextColor(50)
-      doc.text(`${pct.toFixed(1)}%`, 165, barY + 5.5)
-    })
-
-    addFooter()
-
-    
-    doc.addPage()
-    addHeader('Clinical Analysis — Page 3', 3, 4)
-
-    y = 40
-    y = sectionTitle('Condition Overview', y)
-    doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(60)
-    const descLines = doc.splitTextToSize(result.details.description || 'No description available.', pageW - 28)
-    doc.text(descLines, 14, y)
-    y += descLines.length * 4.5 + 8
-
-    if (result.details.analysis) {
-      y = sectionTitle('Visual Analysis Notes', y)
-      doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(60)
-      const anaLines = doc.splitTextToSize(result.details.analysis, pageW - 28)
-      doc.text(anaLines, 14, y)
-      y += anaLines.length * 4.5 + 8
-    }
-
-    y = sectionTitle('Clinical Recommendation', y)
-    doc.setFillColor(...lightBg)
-    doc.roundedRect(14, y, pageW - 28, 20, 2, 2, 'F')
-    doc.setFontSize(8.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(...accent)
-    const advLines = doc.splitTextToSize(result.details.advice || 'Please consult an ophthalmologist.', pageW - 34)
-    doc.text(advLines, 17, y + 7)
-    y += 28
-
-    y = sectionTitle('Treatment Protocol', y)
-    autoTable(doc, {
-      startY: y,
-      head: [['#', 'Recommended Treatment / Intervention']],
-      body: (result.details.treatment || []).map((t, i) => [String(i + 1), t]),
-      theme: 'striped',
-      headStyles: { fillColor: brand, fontSize: 8 },
-      bodyStyles: { fontSize: 8 },
-      columnStyles: { 0: { cellWidth: 10, halign: 'center' } },
-      margin: { left: 14, right: 14 },
-    })
-
-    y = doc.lastAutoTable.finalY + 8
-    y = sectionTitle('Common Symptoms of This Condition', y)
-    autoTable(doc, {
-      startY: y,
-      head: [['Symptom']],
-      body: (result.details.symptoms || []).map(s => [s]),
-      theme: 'striped',
-      headStyles: { fillColor: [70, 70, 70], fontSize: 8 },
-      bodyStyles: { fontSize: 8 },
-      margin: { left: 14, right: 14 },
-    })
-
-    addFooter()
-
-    
-    doc.addPage()
-    addHeader('Precautions & Next Steps — Page 4', 4, 4)
-
-    y = 40
-    y = sectionTitle('Precautions & Self-Care', y)
-    autoTable(doc, {
-      startY: y,
-      head: [['#', 'Precaution']],
-      body: (result.details.precautions || []).map((p, i) => [String(i + 1), p]),
-      theme: 'striped',
-      headStyles: { fillColor: [109, 40, 217], fontSize: 8 },
-      bodyStyles: { fontSize: 8 },
-      columnStyles: { 0: { cellWidth: 10, halign: 'center' } },
-      margin: { left: 14, right: 14 },
-    })
-
-    y = doc.lastAutoTable.finalY + 10
-
-    
-    y = sectionTitle('🗺 Find a Qualified Ophthalmologist Near You', y)
-    doc.setFillColor(240, 253, 244)
-    doc.roundedRect(14, y, pageW - 28, 55, 3, 3, 'F')
-    doc.setDrawColor(16, 185, 129)
-    doc.roundedRect(14, y, pageW - 28, 55, 3, 3, 'S')
-
-    doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(6, 78, 59)
-    doc.text('How to find the nearest ophthalmologist:', 18, y + 9)
-
-    const searchLinks = [
-      { label: 'Google Maps Search', url: 'https://www.google.com/maps/search/ophthalmologist+near+me' },
-      { label: 'Practo (India)', url: 'https://www.practo.com/find-doctors/eye-doctor-ophthalmologist' },
-      { label: 'Healthgrades (US)', url: 'https://www.healthgrades.com/ophthalmologist-directory' },
-      { label: 'NHS Find a Service (UK)', url: 'https://www.nhs.uk/nhs-services/opticians' },
-    ]
-    doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(6, 95, 70)
-    searchLinks.forEach((link, i) => {
-      doc.text(`• ${link.label}: ${link.url}`, 18, y + 18 + i * 9)
-    })
-
-    doc.setFontSize(7.5); doc.setTextColor(100)
-    doc.text('* These links are provided for convenience. OphthalmoAI is not affiliated with any of these services.', 18, y + 52)
-
-    y += 65
-
-    
-    y = sectionTitle('🚨 When to Seek Immediate Emergency Eye Care', y)
-    const emergencies = [
-      'Sudden loss of vision in one or both eyes',
-      'Eye injury from chemical splash or foreign object',
-      'Sudden severe eye pain with nausea/vomiting',
-      'Double vision or visual disturbances after head trauma',
-      'Curtain/shadow effect in visual field (possible retinal detachment)',
-      'Yellow sclera (jaundice) — seek internal medicine immediately',
-    ]
-    doc.setFillColor(254, 242, 242)
-    doc.roundedRect(14, y, pageW - 28, emergencies.length * 7.5 + 10, 2, 2, 'F')
-    doc.setDrawColor(220, 38, 38)
-    doc.roundedRect(14, y, pageW - 28, emergencies.length * 7.5 + 10, 2, 2, 'S')
-    doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(185, 28, 28)
-    emergencies.forEach((e, i) => {
-      doc.text(`⚡ ${e}`, 18, y + 7 + i * 7.5)
-    })
-
-    addFooter()
-
-    const ts = new Date().toISOString().slice(0, 19).replace(/[: ]/g, '-')
-    doc.save(`OphthalmoAI_Report_${result.diagnosis}_${ts}.pdf`)
+  if (!result) return
+ 
+  const doc  = new jsPDF()
+  const pW   = 210         
+  const pH   = 297          
+  const mg   = 15          
+  const cW   = pW - mg * 2  
+ 
+  const navy    = [15,  32,  64]
+  const accent  = [8,  145, 178]
+  const aLight  = [240, 249, 255]
+  const aBorder = [186, 230, 253]
+  const slate   = [100, 116, 139]
+  const slateL  = [248, 250, 252]
+  const border  = [226, 232, 240]
+  const success = [16,  185, 129]
+  const danger  = [239,  68,  68]
+  const amber   = [245, 158,  11]
+ 
+  const isNormal   = result.diagnosis === 'Normal'
+  const isCritical = /high|emergency|sight/i.test(result.details.severity || '')
+  const diagColor  = isNormal ? success : isCritical ? danger : accent
+ 
+  const diagTint = diagColor.map(v => Math.min(255, v + 210))
+ 
+  const rr = (x, y, w, h, r, fill, stroke, sw = 0.3) => {
+    if (fill)   { doc.setFillColor(...fill);   doc.roundedRect(x, y, w, h, r, r, 'F') }
+    if (stroke) { doc.setDrawColor(...stroke); doc.setLineWidth(sw); doc.roundedRect(x, y, w, h, r, r, 'S') }
   }
+ 
+  const strip = (x, y, h, color) => {
+    doc.setFillColor(...color)
+    doc.roundedRect(x, y, 3, h, 1.5, 1.5, 'F')
+  }
+ 
+  const t = (str, x, y, size, color, weight = 'normal', align = 'left') => {
+    doc.setFontSize(size)
+    doc.setFont('helvetica', weight)
+    doc.setTextColor(...color)
+    doc.text(str, x, y, { align })
+  }
+ 
+  const dot = (x, y, r, color) => {
+    doc.setFillColor(...color)
+    doc.circle(x, y, r, 'F')
+  }
+ 
+  const footer = (page, total) => {
+    doc.setFillColor(...slateL)
+    doc.rect(0, pH - 12, pW, 12, 'F')
+    doc.setDrawColor(...border)
+    doc.setLineWidth(0.3)
+    doc.line(mg, pH - 12, pW - mg, pH - 12)
+    t(`Page ${page} of ${total}`, mg, pH - 4.5, 7, slate)
+    t(
+      'Not a clinical diagnosis — always consult a qualified ophthalmologist.',
+      pW / 2, pH - 4.5, 7, [180, 120, 40], 'normal', 'center'
+    )
+    t(
+      new Date().toLocaleDateString(),
+      pW - mg, pH - 4.5, 7, slate, 'normal', 'right'
+    )
+  }
+ 
+  doc.setFillColor(...navy)
+  doc.rect(0, 0, pW, 20, 'F')
+  t('OphthalmoAI', mg, 9, 12, [255, 255, 255], 'bold')
+  t('Eye Screening Report', mg, 16, 7.5, [150, 195, 220])
+  t(
+    new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
+    pW - mg, 13, 8, [160, 200, 225], 'normal', 'right'
+  )
+ 
+  let y = 28
+ 
+  rr(mg, y, cW, 46, 4, diagTint, diagColor, 0.5)
+  strip(mg, y, 46, diagColor)
+ 
+  t('SCREENING RESULT', mg + 10, y + 7,  6.5, slate, 'bold')
+  t(result.diagnosis,   mg + 10, y + 21, 22,  navy,  'bold')
+  t(
+    `${result.confidence.toFixed(1)}% confidence  ·  ${result.group_name}`,
+    mg + 10, y + 30, 8, slate
+  )
+ 
+  const sevText    = result.details.severity || ''
+  const sevDisplay = sevText.length > 28 ? sevText.slice(0, 28) + '…' : sevText
+  const badgeW     = Math.min(78, sevDisplay.length * 2.3 + 14)
+  rr(pW - mg - badgeW, y + 9, badgeW, 10, 3, diagTint, diagColor, 0.5)
+  t(sevDisplay, pW - mg - badgeW / 2, y + 15.5, 7, diagColor, 'bold', 'center')
+ 
+  y += 54
+ 
+  if (result.hybrid_warnings?.length > 0) {
+    const aH = result.hybrid_warnings.length * 8 + 14
+    rr(mg, y, cW, aH, 3, [255, 251, 235], [253, 211, 77], 0.4)
+    strip(mg, y, aH, amber)
+    t('AI clinical notes', mg + 9, y + 8, 7.5, [120, 65, 5], 'bold')
+    result.hybrid_warnings.forEach((w, i) => {
+      t(w, mg + 9, y + 14 + i * 8, 7.5, [140, 80, 10])
+    })
+    y += aH + 8
+  }
+ 
+  const descLines = doc.splitTextToSize(result.details.description || '', cW - 10)
+  const descH     = descLines.length * 4.8 + 14
+  rr(mg, y, cW, descH, 3, aLight, aBorder, 0.3)
+  t('About this condition', mg + 7, y + 8, 7.5, accent, 'bold')
+  descLines.forEach((line, i) => t(line, mg + 7, y + 14 + i * 4.8, 8, [30, 58, 90]))
+  y += descH + 7
+ 
+  const advLines = doc.splitTextToSize(result.details.advice || '', cW - 10)
+  const advH     = advLines.length * 4.8 + 14
+  rr(mg, y, cW, advH, 3, [240, 253, 244], [134, 239, 172], 0.3)
+  strip(mg, y, advH, success)
+  t('What you should do', mg + 9, y + 8, 7.5, [6, 78, 59], 'bold')
+  advLines.forEach((line, i) => t(line, mg + 9, y + 14 + i * 4.8, 8, [20, 83, 45]))
+  y += advH + 8
+ 
+  if (y < pH - 62) {
+    t('Symptoms you reported', mg, y, 9, navy, 'bold')
+    y += 10
+ 
+    const syms = [
+      ['Pain level',        pain],
+      ['Vision changes',    vision],
+      ['Itchiness',         itch],
+      ['Halos / Glare',     halos],
+      ['Eye discharge',     discharge],
+      ['Light sensitivity', lightSens],
+      ['Floaters / Spots',  spots],
+      ['Duration',          duration],
+    ]
+    const cols  = 4
+    const chipW = (cW - (cols - 1) * 3) / cols
+    const chipH = 13
+ 
+    syms.forEach(([label, value], i) => {
+      const col = i % cols
+      const row = Math.floor(i / cols)
+      const cx  = mg + col * (chipW + 3)
+      const cy  = y + row * (chipH + 3)
+      rr(cx, cy, chipW, chipH, 2.5, slateL, border, 0.3)
+      t(label, cx + 4, cy + 5,   6.5, slate,  'normal')
+      t(value, cx + 4, cy + 10,  7.5, navy,   'bold')
+    })
+  }
+ 
+  footer(1, 3)
+ 
+  doc.addPage()
+ 
+  doc.setFillColor(...navy)
+  doc.rect(0, 0, pW, 16, 'F')
+  t('Treatment & Self-Care', mg, 10, 8.5, [255, 255, 255], 'bold')
+  t(`${result.diagnosis}  ·  OphthalmoAI`, pW - mg, 10, 8, [160, 200, 225], 'normal', 'right')
+ 
+  y = 24
+ 
+  t('Recommended treatment options', mg, y, 9, navy, 'bold')
+  y += 8
+ 
+  ;(result.details.treatment || []).forEach((item, i) => {
+    const lines = doc.splitTextToSize(item, cW - 17)
+    const h     = lines.length * 4.8 + 10
+    rr(mg, y, cW, h, 3, [255, 255, 255], border, 0.3)
+    dot(mg + 6.5, y + h / 2, 4.5, accent)
+    t(String(i + 1), mg + 6.5, y + h / 2 + 1, 7, [255, 255, 255], 'bold', 'center')
+    lines.forEach((line, j) => t(line, mg + 15, y + 6 + j * 4.8, 8, navy))
+    y += h + 4
+  })
+ 
+  y += 6
+ 
+  t(`Common signs of ${result.diagnosis}`, mg, y, 9, navy, 'bold')
+  y += 8
+ 
+  const sympList = result.details.symptoms || []
+  const sCols    = 2
+  const sColW    = (cW - 8) / sCols
+ 
+  sympList.forEach((s, i) => {
+    const col  = i % sCols
+    const row  = Math.floor(i / sCols)
+    const sx   = mg + col * (sColW + 8)
+    const sy   = y + row * 9
+    dot(sx + 2.5, sy + 3, 1.5, accent)
+    const lines = doc.splitTextToSize(s, sColW - 9)
+    t(lines[0] || '', sx + 7, sy + 4.5, 8, navy)
+  })
+ 
+  y += Math.ceil(sympList.length / sCols) * 9 + 10
+ 
+  t('Precautions & self-care', mg, y, 9, navy, 'bold')
+  y += 8
+ 
+  ;(result.details.precautions || []).forEach((p) => {
+    const lines = doc.splitTextToSize(p, cW - 12)
+    const h     = lines.length * 4.8 + 8
+    rr(mg, y, cW, h, 3, [255, 251, 235], [253, 230, 138], 0.3)
+    strip(mg, y, h, amber)
+    lines.forEach((line, j) => t(line, mg + 9, y + 5 + j * 4.8, 8, [120, 53, 15]))
+    y += h + 4
+  })
+ 
+  footer(2, 3)
+ 
+  doc.addPage()
+ 
+  doc.setFillColor(...navy)
+  doc.rect(0, 0, pW, 16, 'F')
+  t('AI Analysis & Next Steps', mg, 10, 8.5, [255, 255, 255], 'bold')
+  t(`${result.diagnosis}  ·  OphthalmoAI`, pW - mg, 10, 8, [160, 200, 225], 'normal', 'right')
+ 
+  y = 24
+ 
+  t('Your scan & AI attention map', mg, y, 9, navy, 'bold')
+  y += 7
+ 
+  const imgSz = 74
+  try {
+    if (preview) {
+      const b64 = await urlToBase64(preview)
+      rr(mg, y, imgSz, imgSz, 3, [255, 255, 255], border, 0.4)
+      doc.addImage(b64, 'JPEG', mg + 1, y + 1, imgSz - 2, imgSz - 2)
+      t('Your eye scan', mg + imgSz / 2, y + imgSz + 5.5, 7, slate, 'normal', 'center')
+    }
+ 
+    if (heatmap) {
+      const hx = mg + imgSz + 6
+      rr(hx, y, imgSz, imgSz, 3, [255, 255, 255], border, 0.4)
+      doc.addImage(heatmap, 'JPEG', hx + 1, y + 1, imgSz - 2, imgSz - 2)
+      t('Grad-CAM attention map', hx + imgSz / 2, y + imgSz + 5.5, 7, slate, 'normal', 'center')
+ 
+      const expX = mg + imgSz * 2 + 12
+      const expW = cW - imgSz * 2 - 12
+      if (expW > 22) {
+        rr(expX, y, expW, imgSz, 3, aLight, aBorder, 0.3)
+        t('How to read', expX + 6, y + 9,  7.5, accent, 'bold')
+        t('the heatmap', expX + 6, y + 15, 7.5, accent, 'bold')
+        const helpText =
+          'Warm colours (red/orange) show the parts of the image the AI focused on most. ' +
+          'This helps doctors understand and verify the result.'
+        doc.splitTextToSize(helpText, expW - 10).forEach((line, i) => {
+          t(line, expX + 6, y + 23 + i * 4.5, 7.5, [30, 58, 90])
+        })
+      }
+    }
+  } catch (e) {
+    console.warn('PDF image error:', e)
+  }
+ 
+  y += imgSz + 13
+ 
+  t('AI confidence breakdown',                        mg, y,     9,   navy, 'bold')
+  t('Within the detected anatomical group',           mg, y + 6, 7.5, slate)
+  y += 13
+ 
+  const probs   = Object.entries(result.probabilities || {}).sort(([, a], [, b]) => b - a)
+  const maxBarW = cW - 52
+ 
+  probs.forEach(([label, prob], i) => {
+    const pct  = prob * 100
+    const bW   = Math.max((pct / 100) * maxBarW, 2)
+    const by   = y + i * 13
+    const top  = i === 0
+    t(label, mg,  by + 5, 8, top ? navy : slate, top ? 'bold' : 'normal')
+    rr(mg + 40, by, maxBarW, 5.5, 2, [241, 245, 249], null)
+    rr(mg + 40, by, bW,      5.5, 2, top ? accent : [186, 230, 253], null)
+    t(`${pct.toFixed(1)}%`, mg + 40 + maxBarW + 4, by + 5, 7.5, top ? navy : slate, top ? 'bold' : 'normal')
+  })
+ 
+  y += probs.length * 13 + 12
+ 
+  const ems = [
+    'Sudden loss of vision in one or both eyes',
+    'Severe eye pain accompanied by nausea or vomiting',
+    'Chemical splash or a foreign object in the eye',
+    'Yellowing of the whites of the eyes (could indicate jaundice)',
+    'A shadow or curtain effect spreading across your vision',
+  ]
+  const emH = ems.length * 7.5 + 16
+  rr(mg, y, cW, emH, 3, [254, 242, 242], [254, 202, 202], 0.4)
+  strip(mg, y, emH, danger)
+  t('Go to emergency care immediately if you experience:', mg + 9, y + 8,  8,   danger,       'bold')
+  ems.forEach((e, i) => t(`• ${e}`, mg + 9, y + 15 + i * 7.5, 7.5, [185, 28, 28]))
+ 
+  y += emH + 8
+ 
+  const docLinks = [
+    ['Google Maps',         'maps.google.com/search/ophthalmologist+near+me'],
+    ['Practo (India)',      'practo.com/find-doctors/eye-doctor'],
+    ['Healthgrades (US)',   'healthgrades.com/ophthalmologist-directory'],
+    ['NHS Find (UK)',       'nhs.uk/nhs-services/opticians'],
+  ]
+  const dlH = docLinks.length * 8 + 18
+  rr(mg, y, cW, dlH, 3, [240, 253, 244], [134, 239, 172], 0.3)
+  strip(mg, y, dlH, success)
+  t('Find a qualified eye specialist near you', mg + 9, y + 9, 8, [6, 78, 59], 'bold')
+  docLinks.forEach(([name, url], i) => {
+    t(`${name}:`, mg + 9,  y + 17 + i * 8, 7.5, [6, 95, 70], 'bold')
+    t(url,        mg + 42, y + 17 + i * 8, 7.5, [20, 83, 45])
+  })
+ 
+  footer(3, 3)
+ 
+  const ts = new Date().toISOString().slice(0, 10)
+  doc.save(`OphthalmoAI_${result.diagnosis}_${ts}.pdf`)
+}
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-6xl px-4 py-12 mx-auto sm:px-6 lg:px-8">
       {}
       {isCropping && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4"
           style={{ background: 'rgba(15, 32, 64, 0.95)' }}>
-          <p className="text-white/50 text-xs mb-4 uppercase tracking-widest font-medium">Adjust crop area</p>
+          <p className="mb-4 text-xs font-medium tracking-widest uppercase text-white/50">Adjust crop area</p>
           <div className="relative w-full max-w-sm overflow-hidden rounded-xl"
             style={{ height: 'min(52vh, 360px)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <Cropper image={preview} crop={crop} zoom={zoom} aspect={1}
@@ -1106,7 +1127,7 @@ const DiagnosticPage = () => {
       )}
 
       <div className="mb-8">
-        <p className="section-label mb-2">Diagnostic Tool</p>
+        <p className="mb-2 section-label">Diagnostic Tool</p>
         <h2 className="text-2xl font-semibold" style={{ color: NAVY, fontFamily: 'var(--font-display)' }}>
           Upload a Scan to Begin
         </h2>
@@ -1114,11 +1135,11 @@ const DiagnosticPage = () => {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {}
-        <div className="lg:col-span-5 space-y-4">
-          <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+        <div className="space-y-4 lg:col-span-5">
+          <div className="overflow-hidden bg-white border rounded-xl border-slate-200">
             {!preview ? (
-              <label className="flex flex-col items-center justify-center h-52 cursor-pointer border-b border-dashed border-slate-200 transition-colors hover:bg-slate-50">
-                <div className="p-3 rounded-xl mb-3" style={{ background: '#F0F9FF' }}>
+              <label className="flex flex-col items-center justify-center transition-colors border-b border-dashed cursor-pointer h-52 border-slate-200 hover:bg-slate-50">
+                <div className="p-3 mb-3 rounded-xl" style={{ background: '#F0F9FF' }}>
                   <Upload className="w-6 h-6" style={{ color: ACCENT }} />
                 </div>
                 <span className="text-sm font-medium text-slate-600">Upload Eye Scan</span>
@@ -1126,10 +1147,10 @@ const DiagnosticPage = () => {
                 <input type="file" className="hidden" onChange={handleFileChange} accept="image/*" />
               </label>
             ) : (
-              <div className="relative bg-slate-900 h-52 overflow-hidden group">
+              <div className="relative overflow-hidden bg-slate-900 h-52 group">
                 <img src={showHeatmap && heatmap ? heatmap : preview} className="object-contain w-full h-full" alt="Eye scan" />
                 {heatmap && (
-                  <div className="absolute inset-0 flex items-end p-3 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/50 to-transparent">
+                  <div className="absolute inset-0 flex items-end p-3 transition-opacity opacity-0 group-hover:opacity-100 bg-gradient-to-t from-black/50 to-transparent">
                     <button onClick={() => setShowHeatmap(!showHeatmap)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-white text-xs font-medium"
                       style={{ background: 'rgba(8, 145, 178, 0.85)' }}>
@@ -1159,7 +1180,7 @@ const DiagnosticPage = () => {
 
             <div className="p-4 flex flex-col gap-2.5">
               <button onClick={handleAnalyze} disabled={!file || loading}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg font-semibold text-sm text-white transition-colors"
+                className="flex items-center justify-center w-full gap-2 py-3 text-sm font-semibold text-white transition-colors rounded-lg"
                 style={{ background: (!file || loading) ? '#94A3B8' : ACCENT, cursor: loading ? 'wait' : (!file ? 'not-allowed' : 'pointer') }}
                 onMouseEnter={e => { if (!loading && file) e.currentTarget.style.background = ACCENT_DARK }}
                 onMouseLeave={e => { if (!loading && file) e.currentTarget.style.background = ACCENT }}>
@@ -1178,7 +1199,7 @@ const DiagnosticPage = () => {
           {!result && (
             <div className="grid grid-cols-3 gap-3">
               {[{ label: '7 Conditions', sub: 'Detected' }, { label: 'EfficientNet-B4', sub: 'Backbone' }, { label: 'Grad-CAM', sub: 'Heatmaps' }].map((c, i) => (
-                <div key={i} className="flex flex-col items-center gap-1 py-4 rounded-xl text-center bg-white" style={{ border: '1px solid #E2E8F0' }}>
+                <div key={i} className="flex flex-col items-center gap-1 py-4 text-center bg-white rounded-xl" style={{ border: '1px solid #E2E8F0' }}>
                   <span className="text-xs font-semibold" style={{ color: NAVY }}>{c.label}</span>
                   <span className="text-[10px] text-slate-400">{c.sub}</span>
                 </div>
@@ -1192,9 +1213,9 @@ const DiagnosticPage = () => {
           {result ? (
             <div className="space-y-4 animate-fade-up">
               {}
-              <div className="rounded-xl bg-white overflow-hidden"
+              <div className="overflow-hidden bg-white rounded-xl"
                 style={{ border: '1px solid #E2E8F0', borderLeft: `4px solid ${result.diagnosis === 'Normal' ? '#10B981' : ACCENT}` }}>
-                <div className="p-6 flex items-start justify-between gap-4">
+                <div className="flex items-start justify-between gap-4 p-6">
                   <div className="flex items-start gap-3">
                     <div className="p-2.5 rounded-xl flex-shrink-0 mt-0.5"
                       style={{ background: result.diagnosis === 'Normal' ? '#F0FDF4' : '#F0F9FF' }}>
@@ -1219,9 +1240,9 @@ const DiagnosticPage = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-2 flex-shrink-0">
+                  <div className="flex flex-shrink-0 gap-2">
                     <button onClick={speakReport}
-                      className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
+                      className="p-2 transition-colors border rounded-lg border-slate-200 hover:bg-slate-50"
                       title={isSpeaking ? 'Stop narration' : 'Read report aloud'}>
                       {isSpeaking ? <VolumeX className="w-4 h-4" style={{ color: ACCENT }} /> : <Volume2 className="w-4 h-4 text-slate-400" />}
                     </button>
@@ -1249,7 +1270,7 @@ const DiagnosticPage = () => {
               )}
 
               {}
-              <div className="rounded-xl bg-white border border-slate-200 overflow-hidden">
+              <div className="overflow-hidden bg-white border rounded-xl border-slate-200">
                 <div className="flex border-b border-slate-100">
                   <TabButton active={activeTab === 'treatment'} onClick={() => setActiveTab('treatment')} icon={<Pill className="w-3.5 h-3.5" />} label="Treatment" />
                   <TabButton active={activeTab === 'doctor'} onClick={() => setActiveTab('doctor')} icon={<Stethoscope className="w-3.5 h-3.5" />} label="Doctor's Note" />
@@ -1265,7 +1286,7 @@ const DiagnosticPage = () => {
                         {(result.details.treatment || []).map((t, i) => (
                           <div key={i} className="flex items-start gap-3 p-3.5 rounded-lg border border-slate-100" style={{ background: '#FAFBFC' }}>
                             <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ background: ACCENT }} />
-                            <p className="text-sm text-slate-700 leading-snug">{t}</p>
+                            <p className="text-sm leading-snug text-slate-700">{t}</p>
                           </div>
                         ))}
                       </div>
@@ -1274,25 +1295,25 @@ const DiagnosticPage = () => {
 
                   {activeTab === 'doctor' && (
                     <div className="space-y-4 animate-fade-in">
-                      <div className="p-4 rounded-lg border" style={{ background: '#F0F9FF', borderColor: '#BAE6FD' }}>
+                      <div className="p-4 border rounded-lg" style={{ background: '#F0F9FF', borderColor: '#BAE6FD' }}>
                         <div className="flex items-center gap-2 mb-2">
                           <Stethoscope className="w-3.5 h-3.5" style={{ color: ACCENT }} />
                           <span className="text-xs font-semibold" style={{ color: '#0369A1' }}>Clinical Note</span>
                         </div>
-                        <p className="text-sm text-slate-700 leading-relaxed">{result.details.advice}</p>
+                        <p className="text-sm leading-relaxed text-slate-700">{result.details.advice}</p>
                       </div>
-                      <div className="p-4 rounded-lg border border-slate-100" style={{ background: '#FAFBFC' }}>
+                      <div className="p-4 border rounded-lg border-slate-100" style={{ background: '#FAFBFC' }}>
                         <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2">Condition Overview</p>
-                        <p className="text-sm text-slate-600 leading-relaxed">{result.details.description}</p>
+                        <p className="text-sm leading-relaxed text-slate-600">{result.details.description}</p>
                       </div>
                       {result.details.analysis && (
-                        <div className="p-4 rounded-lg border border-slate-100" style={{ background: '#FAFBFC' }}>
+                        <div className="p-4 border rounded-lg border-slate-100" style={{ background: '#FAFBFC' }}>
                           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2">Visual Analysis</p>
-                          <p className="text-sm text-slate-600 leading-relaxed">{result.details.analysis}</p>
+                          <p className="text-sm leading-relaxed text-slate-600">{result.details.analysis}</p>
                         </div>
                       )}
                       <a href="https://www.google.com/maps/search/ophthalmologist+near+me" target="_blank" rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-medium transition-colors text-white"
+                        className="flex items-center justify-center w-full gap-2 py-3 text-sm font-medium text-white transition-colors rounded-lg"
                         style={{ background: NAVY }}
                         onMouseEnter={e => e.currentTarget.style.background = '#1E3A5F'}
                         onMouseLeave={e => e.currentTarget.style.background = NAVY}>
@@ -1304,7 +1325,7 @@ const DiagnosticPage = () => {
                   {activeTab === 'symptoms' && (
                     <div className="animate-fade-in">
                       <h4 className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-4">Common Indicators — {result.diagnosis}</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-5">
+                      <div className="grid grid-cols-1 gap-2 mb-5 sm:grid-cols-2">
                         {(result.details.symptoms || []).map((s, i) => (
                           <div key={i} className="flex items-center gap-2.5 p-3 rounded-lg border border-slate-100" style={{ background: '#FAFBFC' }}>
                             <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: ACCENT }} />
@@ -1349,11 +1370,11 @@ const DiagnosticPage = () => {
             </div>
           ) : (
             <div className="h-full min-h-[400px] flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-white">
-              <div className="p-5 rounded-2xl mb-4" style={{ background: '#F0F9FF' }}>
+              <div className="p-5 mb-4 rounded-2xl" style={{ background: '#F0F9FF' }}>
                 <Eye className="w-10 h-10" style={{ color: '#BAE6FD' }} />
               </div>
-              <p className="text-sm font-semibold text-slate-400 mb-1" style={{ fontFamily: 'var(--font-display)' }}>Ready for Analysis</p>
-              <p className="text-xs text-slate-300 mb-6">Upload an eye scan to begin</p>
+              <p className="mb-1 text-sm font-semibold text-slate-400" style={{ fontFamily: 'var(--font-display)' }}>Ready for Analysis</p>
+              <p className="mb-6 text-xs text-slate-300">Upload an eye scan to begin</p>
               <div className="flex flex-wrap justify-center gap-1.5 px-6">
                 {['Cataract', 'Conjunctivitis', 'Uveitis', 'Pterygium', 'Eyelid', 'Jaundice', 'Normal'].map(c => (
                   <span key={c} className="text-[10px] px-2.5 py-1 rounded-md font-medium"
@@ -1377,7 +1398,7 @@ const DiagnosticPage = () => {
 
 const DisclaimerBanner = () => (
   <div className="py-2.5 border-b border-amber-100" style={{ background: '#FFFBEB' }}>
-    <div className="max-w-6xl mx-auto px-4 flex items-center justify-center gap-2">
+    <div className="flex items-center justify-center max-w-6xl gap-2 px-4 mx-auto">
       <Info className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#D97706' }} />
       <p className="text-xs" style={{ color: '#92400E' }}>
         <strong>Medical Disclaimer:</strong> OphthalmoAI is a research and educational screening tool.
@@ -1389,13 +1410,13 @@ const DisclaimerBanner = () => (
 
 const Footer = () => (
   <footer className="py-8 border-t border-slate-200" style={{ background: '#F8FAFC' }}>
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div className="flex flex-col items-center justify-between max-w-6xl gap-4 px-4 mx-auto sm:px-6 lg:px-8 sm:flex-row">
       <div className="flex items-center gap-2">
         <Eye className="w-4 h-4" style={{ color: ACCENT }} />
         <span className="text-sm font-semibold" style={{ color: NAVY, fontFamily: 'var(--font-display)' }}>
           Ophthalmo<span style={{ color: ACCENT }}>AI</span>
         </span>
-        <span className="text-slate-200 text-sm select-none">·</span>
+        <span className="text-sm select-none text-slate-200">·</span>
         <span className="text-xs text-slate-400">AI-Powered Ophthalmic Screening</span>
       </div>
       <div className="flex items-center gap-5 text-xs text-slate-400">
@@ -1429,11 +1450,11 @@ export default function App() {
 
       {}
       <nav className="sticky top-0 z-40 bg-white border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl px-4 mx-auto sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             {}
             <button onClick={() => setActiveTab('home')} className="flex items-center gap-2.5">
-              <div className="flex items-center justify-center w-7 h-7 rounded-md" style={{ background: '#F0F9FF' }}>
+              <div className="flex items-center justify-center rounded-md w-7 h-7" style={{ background: '#F0F9FF' }}>
                 <Eye className="w-4 h-4" style={{ color: ACCENT }} />
               </div>
               <span className="text-sm font-semibold" style={{ color: NAVY, fontFamily: 'var(--font-display)' }}>
@@ -1442,7 +1463,7 @@ export default function App() {
             </button>
 
             {}
-            <div className="hidden md:flex items-center gap-1">
+            <div className="items-center hidden gap-1 md:flex">
               {NAV_TABS.map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
@@ -1458,16 +1479,16 @@ export default function App() {
 
             {}
             <div className="flex items-center gap-3">
-              <span className="md:hidden text-xs font-medium text-slate-500">{tabLabel}</span>
+              <span className="text-xs font-medium md:hidden text-slate-500">{tabLabel}</span>
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 block" />
-                <span className="hidden sm:block text-xs font-medium text-slate-500">System Active</span>
+                <span className="hidden text-xs font-medium sm:block text-slate-500">System Active</span>
               </div>
             </div>
           </div>
 
           {}
-          <div className="flex md:hidden border-t border-slate-100 -mx-4 px-2">
+          <div className="flex px-2 -mx-4 border-t md:hidden border-slate-100">
             {NAV_TABS.map(tab => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 flex flex-col items-center gap-0.5 py-2 text-[9px] font-medium transition-colors border-b-2 ${
