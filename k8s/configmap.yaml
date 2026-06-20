@@ -6,5 +6,10 @@ metadata:
 data:
   FORCE_CPU: "false"
   CORS_ORIGINS: "*"
+  CORS_ALLOW_CREDENTIALS: "false"
   OLLAMA_URL: ""
   OLLAMA_MODEL: "llama3.2:3b"
+  GEMINI_MODEL: "gemini-2.0-flash"
+  MAX_FILE_SIZE_BYTES: "20971520"
+  PREDICT_RATE_LIMIT: "10/minute"
+  CHAT_RATE_LIMIT: "30/minute"

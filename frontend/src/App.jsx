@@ -23,6 +23,20 @@ const ACCENT = '#0891B2'
 const ACCENT_DARK = '#0E7490'
 const NAVY = '#0F2040'
 
+// M3: backend is the single source of truth for condition metadata
+// (GET /conditions, backed by backend/medical_data.py). Used as a fallback only if
+// that request fails, so the Conditions page still renders something on a backend
+// outage instead of going blank.
+const FALLBACK_CONDITIONS = [
+  { key: 'Cataract', name: 'Cataract', severity: 'Moderate to Severe (depending on opacity density)', color: '#3B82F6', group: 'Anterior Segment' },
+  { key: 'Uveitis', name: 'Uveitis', severity: 'High (Sight-Threatening Emergency)', color: '#EF4444', group: 'Anterior Segment' },
+  { key: 'Conjunctivitis', name: 'Conjunctivitis', severity: 'Low (usually self-limiting, but contagious)', color: '#10B981', group: 'Ocular Surface' },
+  { key: 'Jaundice', name: 'Jaundice', severity: 'High (Systemic Medical Emergency)', color: '#F59E0B', group: 'Ocular Surface' },
+  { key: 'Pterygium', name: 'Pterygium', severity: 'Moderate (Can threaten vision if it grows large)', color: '#8B5CF6', group: 'Ocular Surface' },
+  { key: 'Eyelid', name: 'Eyelid Conditions', severity: 'Low (Painful but rarely dangerous)', color: '#06B6D4', group: 'Adnexal/Oculoplastic' },
+  { key: 'Normal', name: 'Normal', severity: 'None', color: '#22C55E', group: 'All Groups' },
+]
+
 const urlToBase64 = (url) =>
   new Promise((resolve, reject) => {
     const img = new Image()
@@ -226,7 +240,7 @@ const HomePage = ({ onNavigate }) => (
           {[
             { icon: <Zap className="w-5 h-5" />, title: 'Instant Analysis', desc: 'Real-time inference in seconds with GPU-accelerated models.', color: '#F59E0B' },
             { icon: <Target className="w-5 h-5" />, title: 'Symptom Cross-Check', desc: 'Rule-based engine validates AI diagnosis against reported symptoms.', color: ACCENT },
-            { icon: <Heart className="w-5 h-5" />, title: 'AI Doctor Chat', desc: 'Ophthalmology Q&A powered by Claude or a local LLM.', color: '#EF4444' },
+            { icon: <Heart className="w-5 h-5" />, title: 'AI Doctor Chat', desc: 'Ophthalmology Q&A powered by Google Gemini or a local LLM.', color: '#EF4444' },
           ].map((f, i) => (
             <div key={i} className="flex items-start gap-4">
               <div className="p-2.5 rounded-lg flex-shrink-0" style={{ background: '#F8FAFC', color: f.color }}>
@@ -378,67 +392,31 @@ const WorkflowPage = () => {
 
 
 
+// M3: ConditionsPage now fetches its data from GET /conditions (backed by
+// backend/medical_data.py) instead of maintaining a second, hand-written array that had
+// already drifted out of sync with the backend's severity strings. Falls back to a
+// minimal local list if the request fails, so the page degrades gracefully rather than
+// going empty.
 const ConditionsPage = () => {
   const [selected, setSelected] = useState(null)
+  const [conditions, setConditions] = useState(FALLBACK_CONDITIONS)
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
 
-  const conditions = [
-    {
-      name: 'Cataract', severity: 'Moderate–Severe', color: '#3B82F6', group: 'Anterior Segment',
-      desc: 'A progressive clouding of the eye\'s natural lens behind the iris. The leading cause of vision loss worldwide.',
-      symptoms: ['Cloudy, blurry, or dim vision', 'Difficulty with night vision', 'Sensitivity to light and glare', 'Halos around lights', 'Fading or yellowing of colors'],
-      treatment: ['Prescription glasses (early stage)', 'Phacoemulsification surgery', 'Intraocular Lens (IOL) implantation'],
-      precautions: ['UV-blocking sunglasses', 'Quit smoking', 'Manage diabetes', 'Antioxidant-rich diet'],
-      advice: 'Surgery is the only effective cure and is highly successful. Consult an ophthalmologist to determine if the cataract is mature enough for removal.',
-    },
-    {
-      name: 'Uveitis', severity: 'High — Sight-Threatening', color: '#EF4444', group: 'Anterior Segment',
-      desc: 'Inflammation of the middle layer of the eye (uvea). Often associated with autoimmune disorders or infections.',
-      symptoms: ['Deep, boring eye pain', 'Severe redness around iris', 'Extreme light sensitivity (photophobia)', 'Blurred or cloudy vision', 'Floaters'],
-      treatment: ['Corticosteroid eye drops', 'Cycloplegic (dilating) drops', 'Oral steroids or immunosuppressives', 'Antiviral/antibiotic if infectious'],
-      precautions: ['Dark glasses for light sensitivity', 'Strict steroid drop schedule', 'Screen for autoimmune conditions', 'Monitor eye pressure'],
-      advice: 'This is an ocular emergency. Untreated uveitis can lead to glaucoma, cataracts, and blindness. Seek a uveitis specialist immediately.',
-    },
-    {
-      name: 'Conjunctivitis', severity: 'Low (Contagious)', color: '#10B981', group: 'Ocular Surface',
-      desc: 'Inflammation of the conjunctiva caused by viruses, bacteria, allergens, or chemical irritants. Commonly called "Pink Eye".',
-      symptoms: ['Pink or red in white of eye', 'Itching, irritation, or burning', 'Excessive tearing', 'Thick yellow/green discharge (bacterial)', 'Gritty feeling'],
-      treatment: ['Artificial tears', 'Antibiotic eyedrops (bacterial only)', 'Antihistamine drops (allergic)', 'Cold compresses', 'Self-resolves in 7–14 days (viral)'],
-      precautions: ['Do not rub eyes', 'Wash hands frequently', 'Change pillowcases daily', 'Discard old eye makeup', 'No contact lenses until healed'],
-      advice: 'Practice strict hygiene to prevent spreading. If discharge is thick/yellow or pain is moderate, see a doctor for antibiotics.',
-    },
-    {
-      name: 'Jaundice', severity: 'High — Systemic Emergency', color: '#F59E0B', group: 'Ocular Surface',
-      desc: 'Scleral Icterus — yellowing of the eye\'s whites indicating high bilirubin. A vital systemic warning sign, not an eye disease itself.',
-      symptoms: ['Yellowing of whites of eyes', 'Yellowing of skin', 'Dark or brown urine', 'Pale, clay-colored stools', 'Fatigue and abdominal pain'],
-      treatment: ['Treat underlying cause (liver/gallbladder)', 'Antiviral medication (hepatitis)', 'Surgery for gallstones', 'Alcohol cessation'],
-      precautions: ['Avoid alcohol completely', 'No medications without doctor approval', 'Liver-friendly diet', 'Stay hydrated'],
-      advice: 'CRITICAL: Seek immediate internal medicine evaluation. Blood tests (LFTs) and ultrasound are needed. Do not ignore this finding.',
-    },
-    {
-      name: 'Pterygium', severity: 'Moderate', color: '#8B5CF6', group: 'Ocular Surface',
-      desc: 'A raised, wedge-shaped fibrovascular growth extending from the nasal conjunctiva onto the cornea. Strongly linked to UV exposure.',
-      symptoms: ['Pink, fleshy growth on white of eye', 'Foreign body sensation', 'Redness and inflammation', 'Dryness and itching', 'Blurred vision if pupil involved'],
-      treatment: ['Lubricating artificial tears', 'Steroid drops (inflammation)', 'Surgical excision with conjunctival autograft', 'Prescription eyewear for astigmatism'],
-      precautions: ['Wrap-around UV-blocking sunglasses', 'Wide-brimmed hats outdoors', 'Protect eyes from dust and wind', 'Lubricating drops in dry environments'],
-      advice: 'Monitor growth size. If it approaches the pupil or causes persistent irritation, surgical removal is recommended.',
-    },
-    {
-      name: 'Eyelid Conditions', severity: 'Low', color: '#06B6D4', group: 'Adnexal/Oculoplastic',
-      desc: 'Covers Hordeolum (Stye), Chalazion, and Blepharitis — inflammatory conditions of the eyelid margin, Meibomian glands, or lash follicles.',
-      symptoms: ['Red, painful lump at eyelid edge (Stye)', 'Painless firm lump further back (Chalazion)', 'Greasy flakes at lash base (Blepharitis)', 'Swollen, itchy eyelids', 'Light sensitivity'],
-      treatment: ['Warm compresses 10–15 min, 4×/day', 'Eyelid scrubs with baby shampoo', 'Antibiotic ointment / steroid drops', 'Oral doxycycline for chronic blepharitis', 'Surgical drainage if needed'],
-      precautions: ['Daily lid hygiene', 'Remove eye makeup before sleep', 'Avoid eyeliner during inflammation', 'Do NOT squeeze or pop styes'],
-      advice: 'Consistency with warm compresses is key. Most styes/chalazia resolve with heat therapy. Seek care if vision is affected or lid becomes very hot.',
-    },
-    {
-      name: 'Normal', severity: 'None', color: '#22C55E', group: 'All Groups',
-      desc: 'No visible anterior segment pathology detected. The eye appears structurally normal with healthy conjunctiva, cornea, iris, and pupil.',
-      symptoms: ['No pain, redness, or discharge', 'Clear vision', 'No light sensitivity'],
-      treatment: ['No medical treatment required', 'Routine maintenance'],
-      precautions: ['UV-protective sunglasses', '20-20-20 rule for digital eyestrain', 'Protective eyewear during sports', 'Diet rich in Omega-3 and Vitamin A', 'Avoid smoking'],
-      advice: 'Your eyes look healthy. Keep up routine eye exams every 1-2 years so a doctor can catch issues that are not visible in a photo.',
-    },
-  ]
+  useEffect(() => {
+    let cancelled = false
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    axios.get(`${apiUrl}/conditions`)
+      .then(({ data }) => {
+        if (cancelled) return
+        if (Array.isArray(data?.conditions) && data.conditions.length > 0) {
+          setConditions(data.conditions)
+        }
+      })
+      .catch(() => { if (!cancelled) setLoadError(true) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [])
 
   const ConditionCard = ({ c }) => (
     <div className="p-5 transition-all border cursor-pointer rounded-xl border-slate-200 hover:border-slate-300 hover:shadow-md"
@@ -448,7 +426,7 @@ const ConditionsPage = () => {
         <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{c.group}</span>
       </div>
       <h3 className="mb-1 text-sm font-semibold" style={{ color: NAVY }}>{c.name}</h3>
-      <p className="mb-3 text-xs leading-relaxed text-slate-400 line-clamp-2">{c.desc}</p>
+      <p className="mb-3 text-xs leading-relaxed text-slate-400 line-clamp-2">{c.description}</p>
       <div className="flex items-center justify-between">
         <SeverityBadge severity={c.severity} />
         <ArrowRight className="w-3.5 h-3.5 text-slate-300" />
@@ -466,11 +444,24 @@ const ConditionsPage = () => {
         <p className="max-w-lg text-sm text-slate-500">
           Click any condition card for detailed clinical information, symptoms, treatment protocols, and precautions.
         </p>
+        {loadError && (
+          <p className="flex items-center gap-1.5 mt-3 text-xs text-amber-600">
+            <AlertCircle className="w-3.5 h-3.5" /> Showing offline condition summaries — couldn't reach the backend for full details.
+          </p>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {conditions.map((c, i) => <ConditionCard key={i} c={c} />)}
-      </div>
+      {loading ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div key={i} className="h-32 bg-white border rounded-xl border-slate-200 animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {conditions.map((c, i) => <ConditionCard key={c.key || i} c={c} />)}
+        </div>
+      )}
 
       {}
       {selected && (
@@ -493,34 +484,38 @@ const ConditionsPage = () => {
               </button>
             </div>
             <div className="p-6 space-y-5">
-              <p className="text-sm leading-relaxed text-slate-600">{selected.desc}</p>
+              <p className="text-sm leading-relaxed text-slate-600">{selected.description}</p>
               {[
-                { label: 'Common Symptoms', items: selected.symptoms, icon: <Activity className="w-3.5 h-3.5" />, color: ACCENT },
-                { label: 'Treatment Options', items: selected.treatment, icon: <Pill className="w-3.5 h-3.5" />, color: '#059669' },
-                { label: 'Precautions', items: selected.precautions, icon: <ShieldCheck className="w-3.5 h-3.5" />, color: '#7C3AED' },
+                { label: 'Common Symptoms', items: selected.symptoms || [], icon: <Activity className="w-3.5 h-3.5" />, color: ACCENT },
+                { label: 'Treatment Options', items: selected.treatment || [], icon: <Pill className="w-3.5 h-3.5" />, color: '#059669' },
+                { label: 'Precautions', items: selected.precautions || [], icon: <ShieldCheck className="w-3.5 h-3.5" />, color: '#7C3AED' },
               ].map((section, i) => (
-                <div key={i}>
-                  <div className="flex items-center gap-2 mb-2.5">
-                    <span style={{ color: section.color }}>{section.icon}</span>
-                    <h4 className="text-xs font-semibold tracking-widest uppercase text-slate-400">{section.label}</h4>
+                section.items.length > 0 && (
+                  <div key={i}>
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <span style={{ color: section.color }}>{section.icon}</span>
+                      <h4 className="text-xs font-semibold tracking-widest uppercase text-slate-400">{section.label}</h4>
+                    </div>
+                    <div className="space-y-1.5">
+                      {section.items.map((item, j) => (
+                        <div key={j} className="flex items-start gap-2.5 text-sm text-slate-600">
+                          <div className="flex-shrink-0 w-1 h-1 mt-2 rounded-full" style={{ background: section.color }} />
+                          {item}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                    {section.items.map((item, j) => (
-                      <div key={j} className="flex items-start gap-2.5 text-sm text-slate-600">
-                        <div className="flex-shrink-0 w-1 h-1 mt-2 rounded-full" style={{ background: section.color }} />
-                        {item}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                )
               ))}
-              <div className="p-4 border rounded-lg border-cyan-100" style={{ background: '#F0F9FF' }}>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <Stethoscope className="w-3.5 h-3.5" style={{ color: ACCENT }} />
-                  <span className="text-xs font-semibold" style={{ color: '#0369A1' }}>Clinical Note</span>
+              {selected.advice && (
+                <div className="p-4 border rounded-lg border-cyan-100" style={{ background: '#F0F9FF' }}>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Stethoscope className="w-3.5 h-3.5" style={{ color: ACCENT }} />
+                    <span className="text-xs font-semibold" style={{ color: '#0369A1' }}>Clinical Note</span>
+                  </div>
+                  <p className="text-sm leading-relaxed text-slate-700">{selected.advice}</p>
                 </div>
-                <p className="text-sm leading-relaxed text-slate-700">{selected.advice}</p>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -749,9 +744,19 @@ const DiagnosticPage = () => {
     setLoading(true)
     const formData = new FormData()
     formData.append('file', file)
+    // H1: all 8 symptom fields collected by the form are now sent to /predict.
+    // Previously only pain/vision/itch were appended here; halos, discharge,
+    // light sensitivity, floaters, and duration were collected but silently dropped,
+    // even though they were used in the PDF report and the backend's symptom
+    // cross-check engine already supports them.
     formData.append('pain', pain)
     formData.append('vision', vision)
     formData.append('itch', itch)
+    formData.append('halos', halos)
+    formData.append('discharge', discharge)
+    formData.append('light_sens', lightSens)
+    formData.append('floaters', spots)
+    formData.append('duration', duration)
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
       const { data } = await axios.post(`${apiUrl}/predict`, formData)
@@ -760,7 +765,8 @@ const DiagnosticPage = () => {
       setHeatmap(data.heatmap || null)
       setActiveTab('treatment')
     } catch (err) {
-      alert(`Analysis Error: ${err.message}`)
+      const message = err.response?.data?.detail || err.response?.data?.error || err.message
+      alert(`Analysis Error: ${message}`)
     } finally {
       setLoading(false)
     }
@@ -1408,6 +1414,9 @@ const DisclaimerBanner = () => (
   </div>
 )
 
+// C5 / L3: license text now matches the repository's actual LICENSE file (Apache
+// License 2.0), and the year is computed at render time instead of being hardcoded
+// and going stale every year.
 const Footer = () => (
   <footer className="py-8 border-t border-slate-200" style={{ background: '#F8FAFC' }}>
     <div className="flex flex-col items-center justify-between max-w-6xl gap-4 px-4 mx-auto sm:px-6 lg:px-8 sm:flex-row">
@@ -1424,7 +1433,7 @@ const Footer = () => (
           className="flex items-center gap-1.5 hover:text-slate-700 transition-colors">
           <Github className="w-3.5 h-3.5" /> Source Code
         </a>
-        <span>© 2025 · MIT License</span>
+        <span>© {new Date().getFullYear()} · Apache License 2.0</span>
       </div>
     </div>
   </footer>

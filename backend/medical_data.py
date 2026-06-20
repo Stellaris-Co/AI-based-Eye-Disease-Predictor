@@ -1,5 +1,8 @@
 MEDICAL_INFO = {
     'Cataract': {
+        'name': 'Cataract',
+        'group': 'Anterior Segment',
+        'color': '#3B82F6',
         'analysis': "Visual examination reveals opacification of the crystalline lens, appearing as a grey, white, or yellowish clouding behind the pupil. The red reflex is likely diminished or absent. This indicates a disruption in the structural arrangement of lens fibers.",
         'description': "A cataract is a progressive clouding of the eye's natural lens, which lies behind the iris and the pupil. It is the leading cause of vision loss worldwide. Most cataracts develop slowly over the course of years due to aging, oxidative stress, or metabolic disorders like diabetes, preventing light from focusing sharply on the retina.",
         'symptoms': [
@@ -27,6 +30,9 @@ MEDICAL_INFO = {
         'advice': "Surgery is the only effective cure and is highly successful. Consult an ophthalmologist to determine if the cataract is mature enough for removal or if it significantly interferes with daily activities like driving or reading."
     },
     'Conjunctivitis': {
+        'name': 'Conjunctivitis',
+        'group': 'Ocular Surface',
+        'color': '#10B981',
         'analysis': "The bulbar conjunctiva (white part of the eye) exhibits significant hyperemia (redness) due to dilated blood vessels. There may be visible discharge (watery, mucoid, or purulent) and chemosis (swelling of the conjunctiva). The eyelids may appear slightly swollen.",
         'description': "Conjunctivitis, commonly known as 'Pink Eye', is the inflammation or infection of the transparent membrane (conjunctiva) that lines your eyelid and covers the white part of your eyeball. It can be caused by viruses (Adenovirus), bacteria, allergens (pollen, dust), or chemical irritants.",
         'symptoms': [
@@ -56,6 +62,9 @@ MEDICAL_INFO = {
         'advice': "If the discharge is thick/yellow or pain is moderate, see a doctor for antibiotics. Practice strict hygiene to prevent spreading it to others or your other eye. If vision is affected, seek immediate care."
     },
     'Eyelid': {
+        'name': 'Eyelid Conditions',
+        'group': 'Adnexal/Oculoplastic',
+        'color': '#06B6D4',
         'analysis': "Localized swelling or inflammation is observed on the eyelid margin or body. There may be a distinct nodule (Chalazion/Stye) or generalized redness and crusting along the lash line (Blepharitis). The eyelid skin appears erythematous.",
         'description': "This classification covers general inflammatory conditions of the eyelid, including Hordeolum (Stye), Chalazion, and Blepharitis. These conditions involve the oil glands (Meibomian glands), eyelash follicles, or the eyelid skin itself, often leading to tenderness and blockage.",
         'symptoms': [
@@ -83,6 +92,9 @@ MEDICAL_INFO = {
         'advice': "Consistency with warm compresses is key. Most styes/chalazia resolve on their own with heat therapy. If the swelling affects vision or the lid becomes very red and hot (preseptal cellulitis), seek medical attention immediately."
     },
     'Jaundice': {
+        'name': 'Jaundice',
+        'group': 'Ocular Surface',
+        'color': '#F59E0B',
         'analysis': "Scleral Icterus is present: The sclera (normally white part of the eye) has a distinct yellow discoloration. This is a clinical manifestation of hyperbilirubinemia, where excess bilirubin deposits in the conjunctival tissues.",
         'description': "Jaundice of the eye is not a disease of the eye itself but a vital systemic warning sign. It indicates high levels of bilirubin in the blood, which suggests the liver, gallbladder, or pancreas is not functioning correctly. Causes include hepatitis, cirrhosis, gallstones, or hemolytic anemia.",
         'symptoms': [
@@ -107,6 +119,9 @@ MEDICAL_INFO = {
         'advice': "This is a critical indicator of internal organ dysfunction. You must see a General Practitioner, Internist, or Gastroenterologist immediately for blood tests (LFTs) and ultrasound. Do not ignore this."
     },
     'Uveitis': {
+        'name': 'Uveitis',
+        'group': 'Anterior Segment',
+        'color': '#EF4444',
         'analysis': "Examination shows ciliary flush (redness around the iris) and potential miosis (constricted pupil). The eye appears deeply inflamed compared to surface redness. This involves inflammation of the uveal tract (Iris, Ciliary Body, Choroid).",
         'description': "Uveitis is the inflammation of the middle layer of the eye (uvea). It is a serious condition that can destroy eye tissue and lead to permanent vision loss. It is often associated with autoimmune disorders (like Rheumatoid Arthritis, Lupus) or infections (Herpes, Syphilis), though many cases are idiopathic.",
         'symptoms': [
@@ -133,6 +148,9 @@ MEDICAL_INFO = {
         'advice': "This is an ocular emergency. Untreated uveitis can lead to glaucoma, cataracts, and blindness. Seek a uveitis specialist or ophthalmologist immediately."
     },
     'Normal': {
+        'name': 'Normal',
+        'group': 'All Groups',
+        'color': '#22C55E',
         'analysis': "The sclera is white and clear. The conjunctiva is pink and healthy with no discharge. The cornea is transparent with no opacities. Eyelids and lashes appear healthy with no signs of inflammation.",
         'description': "The eye appears structurally normal with no visible signs of external pathology. The anterior segment structures (cornea, iris, pupil) are intact and healthy in appearance.",
         'symptoms': [
@@ -155,6 +173,9 @@ MEDICAL_INFO = {
         'advice': "Your eyes look healthy. Keep up routine eye exams every 1-2 years so a doctor can catch issues that are not visible in an external eye photo."
     },
     'Pterygium': {
+        'name': 'Pterygium',
+        'group': 'Ocular Surface',
+        'color': '#8B5CF6',
         'analysis': "A wedge-shaped, fibrovascular growth is visible extending from the nasal conjunctiva onto the cornea. The tissue appears pink and fleshy. It may be encroaching on the visual axis.",
         'description': "A Pterygium (Surfer's Eye) is a raised, wedge-shaped growth of the conjunctiva that extends onto the cornea. It is benign but can cause irritation and astigmatism. It is strongly linked to long-term exposure to UV light, dust, and wind.",
         'symptoms': [

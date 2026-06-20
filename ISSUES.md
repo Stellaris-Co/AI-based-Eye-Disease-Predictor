@@ -6,8 +6,7 @@
 > 🟢 Low.
 >
 > See [`ROADMAP.md`](ROADMAP.md) for how these map onto release milestones, and
-> [`docs/ROADMAP.md`](docs/ROADMAP.md) for deeper technical specs referenced from several
-> entries below.
+> for deeper technical specs referenced from several entries below.
 
 ## Summary
 

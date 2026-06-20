@@ -7,7 +7,7 @@
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache%202.0-yellow.svg)](LICENSE)
 
 A full-stack ophthalmology screening app for **7 visible eye conditions**. It uses a MobileNetV3 router, specialist EfficientNet-B4 models, Grad-CAM heatmaps, symptom checks, and a chat helper for follow-up eye-health questions.
 
@@ -71,7 +71,7 @@ Browser → React SPA (port 5173 dev / 8080 prod)
     │  Grad-CAM               │
     └─────────────────────────┘
               ↓
-    Anthropic Claude API  ← /chat endpoint
+    Google Gemini API  ← /chat endpoint
     or Ollama (local LLM)
 ```
 
@@ -139,7 +139,8 @@ Input Image (380×380 px)
 | **Explainability** | pytorch-grad-cam | ≥1.5.4 |
 | **Backend** | FastAPI, Uvicorn, Pydantic | 0.110+ |
 | **Image Processing** | Pillow, OpenCV (headless), NumPy | latest |
-| **LLM Chat** | Anthropic Claude API *or* Ollama | latest |
+| **Rate Limiting** | slowapi | latest |
+| **LLM Chat** | Google Gemini API *or* Ollama | latest |
 | **Frontend** | React, Vite, Tailwind CSS | 19, 7, 3 |
 | **PDF Reports** | jsPDF, jspdf-autotable | 4.x, 5.x |
 | **Image Crop** | react-easy-crop | 5.x |
@@ -216,17 +217,21 @@ OphthalmoAI/
 │
 ├── docs/                    # Project documentation
 │   ├── PRD.md               # Product Requirements Document
-│   ├── TRD.md               # Technical Requirements Document
-│   ├── APP_FLOW.md          # Application Flow & User Journeys
-│   ├── UI_UX_BRIEF.md       # Design System & UI/UX Brief
-│   ├── BACKEND_SCHEMA.md    # API Schema & Data Models
+│   ├── TRD.md                # Technical Requirements Document
+│   ├── APP_FLOW.md           # Application Flow & User Journeys
+│   ├── UI_UX_BRIEF.md        # Design System & UI/UX Brief
+│   ├── BACKEND_SCHEMA.md     # API Schema & Data Models
+│   ├── ROADMAP.md            # Deep technical roadmap
 │   └── IMPLEMENTATION_PLAN.md # Setup & Implementation Checklist
 │
 ├── docker-compose.yml
 ├── .env                     # API keys and config (git-ignored)
+├── .env.example             # Template for .env
 ├── .gitignore
 ├── .dockerignore
 ├── PRODUCTION.md
+├── ROADMAP.md
+├── ISSUES.md
 └── README.md
 ```
 
@@ -257,7 +262,7 @@ cd Eye-Disease-AI-Diagnosis
 
 # Copy and configure environment variables
 cp .env.example .env
-# Edit .env and add ANTHROPIC_API_KEY or OLLAMA_URL
+# Edit .env and add GEMINI_API_KEY or OLLAMA_URL
 
 # Build and start both services
 docker compose up --build
@@ -423,12 +428,13 @@ npm run build
 
 ## Configuration (.env)
 
-Create a `.env` file in the **project root**:
+Create a `.env` file in the **project root** (or copy `.env.example`):
 
 ```env
 # ── LLM Chat Backend (choose one) ──────────────────────────────────────
-# Option A: Anthropic Claude (set key, leave OLLAMA_URL blank)
-ANTHROPIC_API_KEY=sk-ant-your-key-here
+# Option A: Google Gemini (set key, leave OLLAMA_URL blank)
+GEMINI_API_KEY=your-gemini-key-here
+GEMINI_MODEL=gemini-2.0-flash
 
 # Option B: Ollama (free, local)
 OLLAMA_URL=http://localhost:11434
@@ -436,15 +442,21 @@ OLLAMA_MODEL=llama3.2:3b
 
 # ── Inference ───────────────────────────────────────────────────────────
 FORCE_CPU=false        # Set to true to disable GPU for inference
+MAX_FILE_SIZE_BYTES=20971520
 
 # ── Server ──────────────────────────────────────────────────────────────
-CORS_ORIGINS=*         # Comma-separated list of allowed origins
+CORS_ORIGINS=*                  # Comma-separated list of allowed origins
+CORS_ALLOW_CREDENTIALS=false    # Must stay false while CORS_ORIGINS=*
 PORT=8000
 HOST=0.0.0.0
 MODELS_DIR=./models    # Path to trained .pth files
+
+# ── Rate limiting (requires slowapi) ──────────────────────────────────────
+PREDICT_RATE_LIMIT=10/minute
+CHAT_RATE_LIMIT=30/minute
 ```
 
-**Chat backend priority:** `ANTHROPIC_API_KEY` → `OLLAMA_URL` → Setup instructions returned.
+**Chat backend priority:** `GEMINI_API_KEY` → `OLLAMA_URL` → Setup instructions returned.
 
 **VRAM guidance for Ollama on 6 GB GPU:**
 
@@ -456,6 +468,8 @@ MODELS_DIR=./models    # Path to trained .pth files
 | `llama3.1:8b` | ~5.5 GB | ⚠ Very tight |
 
 > By default, the backend sets `"num_gpu": 0` for Ollama to avoid VRAM conflicts with PyTorch models. Remove this if you have sufficient VRAM.
+
+> Get a Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey) — it's free for moderate usage.
 
 ---
 
@@ -487,6 +501,9 @@ Simple liveness check. Returns `{ "ok": true, "device": "cuda" }`.
 ### `GET /ready`
 Readiness check — returns 503 if the router model is not loaded.
 
+### `GET /conditions`
+Returns clinical metadata for all 7 detectable conditions, sourced from `backend/medical_data.py`. The frontend's Conditions page consumes this endpoint directly, so the UI and the AI's clinical reference data can never drift out of sync.
+
 ### `POST /predict`
 
 Accepts an eye scan and symptom data. Returns a full diagnostic result.
@@ -495,10 +512,15 @@ Accepts an eye scan and symptom data. Returns a full diagnostic result.
 
 | Field | Type | Required | Values |
 |-------|------|----------|--------|
-| `file` | `File` | ✅ | JPG / PNG / BMP |
+| `file` | `File` | ✅ | JPG / PNG / BMP (max 20 MB by default) |
 | `pain` | `string` | ✅ | `None` · `Mild` · `Severe` · `Not Sure` |
 | `vision` | `string` | ✅ | `No` · `Yes` · `Not Sure` |
 | `itch` | `string` | ✅ | `No` · `Yes` · `Not Sure` |
+| `halos` | `string` | ❌ | `No` · `Yes` · `Not Sure` |
+| `discharge` | `string` | ❌ | `None` · `Watery` · `Thick/Yellow` · `Not Sure` |
+| `light_sens` | `string` | ❌ | `No` · `Yes` · `Not Sure` |
+| `floaters` | `string` | ❌ | `No` · `Yes` · `Not Sure` |
+| `duration` | `string` | ❌ | `<1 day` ... `>1 month` · `Not Sure` |
 
 **Response:**
 ```json
@@ -516,6 +538,9 @@ Accepts an eye scan and symptom data. Returns a full diagnostic result.
   "hybrid_warnings": [
     "✅ Symptom Match: Itchiness strongly supports Allergic Conjunctivitis."
   ],
+  "hybrid_warnings_structured": [
+    { "severity": "info", "message": "Symptom Match: Itchiness strongly supports Allergic Conjunctivitis." }
+  ],
   "details": {
     "description": "...",
     "analysis": "...",
@@ -527,6 +552,8 @@ Accepts an eye scan and symptom data. Returns a full diagnostic result.
   }
 }
 ```
+
+Errors (offline model, oversized/invalid file, inference failure) are now returned as proper HTTP status codes (`503`, `413`, `415`, `422`, `500`) with a `detail` field, rather than `200 OK` with an `error` key.
 
 ### `POST /chat`
 
@@ -548,7 +575,7 @@ Sends a message to the AI Doctor chatbot.
 ```json
 {
   "reply": "Conjunctivitis (commonly called Pink Eye) is...",
-  "model_used": "anthropic"
+  "model_used": "gemini"
 }
 ```
 
@@ -562,15 +589,16 @@ Full schema documentation: [`docs/BACKEND_SCHEMA.md`](docs/BACKEND_SCHEMA.md)
 |---------|-------------|
 | **Hierarchical Inference** | Two-stage pipeline: router → specialist, mirroring clinical triage |
 | **Grad-CAM Heatmaps** | Visual attention maps showing which image regions drove the diagnosis |
-| **Symptom Cross-Check** | Rule-based engine that validates AI diagnosis against reported symptoms |
+| **Symptom Cross-Check** | Rule-based engine that validates AI diagnosis against all 8 reported symptoms |
 | **Clinical Safety Alerts** | Flags dangerous diagnosis/symptom mismatches |
-| **AI Doctor Chat** | Contextual ophthalmology Q&A powered by Claude or Ollama |
+| **AI Doctor Chat** | Contextual ophthalmology Q&A powered by Google Gemini or Ollama |
 | **4-page PDF report** | Report with scan, heatmap, differential diagnosis, treatment, and "Find a Doctor" links |
 | **Text-to-Speech** | Reads the diagnosis and clinical advice aloud via the Web Speech API |
 | **Image Crop Tool** | Built-in crop interface to focus on the ROI before analysis |
 | **Find a Doctor** | One-click Google Maps link to find ophthalmologists nearby |
 | **Medical News** | Curated eye health research articles |
-| **Conditions Library** | Detailed clinical cards for all 7 detectable conditions |
+| **Conditions Library** | Detailed clinical cards for all 7 detectable conditions, served live from the backend |
+| **Rate Limiting** | `/predict` and `/chat` are protected against abuse via `slowapi` |
 
 ---
 
@@ -618,26 +646,31 @@ kubectl -n ophthalmoai get pods,svc,ingress
 | `ModuleNotFoundError: No module named 'torch'` | venv not activated or wrong torch install | Activate venv; reinstall with CUDA wheel |
 | `Router model not found at models/router.pth` | Models not trained yet | Run `python scripts/train_router.py` |
 | CUDA out of memory during training | Batch size too large | Reduce `BATCH_SIZE` to 2, increase `ACCUMULATION_STEPS` to 16 |
-| Chat returns setup instructions | Neither API key nor Ollama URL set | Add `ANTHROPIC_API_KEY` or `OLLAMA_URL` to `.env` |
+| Chat returns setup instructions | Neither API key nor Ollama URL set | Add `GEMINI_API_KEY` or `OLLAMA_URL` to `.env` |
 | `Connection refused` on Ollama | Ollama not running | Run `ollama serve` in a separate terminal |
-| Frontend can't reach backend | CORS or wrong `VITE_API_URL` | Set `VITE_API_URL=http://localhost:8000` in `frontend/.env.local` |
+| Frontend can't reach backend | CORS or wrong `VITE_API_URL` | Set `VITE_API_URL=http://localhost:8000` in `frontend/.env.local`, or rely on the Vite dev proxy |
 | Grad-CAM heatmap missing | Old `grad-cam` version | Run `pip install "grad-cam>=1.5.4"` |
 | `readinessProbe` failing (K8s) | Models not in Docker image | Rebuild backend image after training; ensure `models/` is present |
+| `RuntimeError: Invalid CORS configuration` on startup | `CORS_ORIGINS=*` combined with `CORS_ALLOW_CREDENTIALS=true` | Set explicit origins in `CORS_ORIGINS`, or leave `CORS_ALLOW_CREDENTIALS` unset/false |
+| `429` from `/predict` or `/chat` | Rate limit hit | Wait, or raise `PREDICT_RATE_LIMIT` / `CHAT_RATE_LIMIT` in `.env` |
 
 ---
 
 ## Documentation
 
-Additional project documentation is available in the [`docs/`](docs/) folder:
+Additional project documentation is available in the [`docs/`](docs/) folder, plus two root-level planning documents:
 
 | Document | Description |
 |----------|-------------|
+| [`ROADMAP.md`](ROADMAP.md) | Project-wide milestone roadmap (v1.1 → v3.1) |
+| [`ISSUES.md`](ISSUES.md) | Consolidated bug/tech-debt tracker |
 | [`docs/PRD.md`](docs/PRD.md) | Product Requirements Document |
 | [`docs/TRD.md`](docs/TRD.md) | Technical Requirements Document |
 | [`docs/APP_FLOW.md`](docs/APP_FLOW.md) | Application Flow & User Journeys |
 | [`docs/UI_UX_BRIEF.md`](docs/UI_UX_BRIEF.md) | Design System & UI/UX Brief |
 | [`docs/BACKEND_SCHEMA.md`](docs/BACKEND_SCHEMA.md) | API Schema & Data Models |
 | [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) | Setup & Implementation Checklist |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Deep technical roadmap (accuracy, modalities, enterprise readiness) |
 
 ---
 
@@ -655,7 +688,7 @@ Please follow conventional commits and ensure all linting passes (`npm run lint`
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+Apache License 2.0 — see [LICENSE](LICENSE) for details.
 
 ---
 
@@ -665,4 +698,4 @@ MIT License — see [LICENSE](LICENSE) for details.
 - [Grad-CAM](https://arxiv.org/abs/1610.02391) — Selvaraju et al.
 - [pytorch-grad-cam](https://github.com/jacobgil/pytorch-grad-cam) — Jacob Gildenblat
 - [FastAPI](https://fastapi.tiangolo.com/) — Sebastián Ramírez
-- [Anthropic Claude](https://www.anthropic.com/) — AI Doctor chat backend
+- [Google Gemini](https://ai.google.dev/) — AI Doctor chat backend

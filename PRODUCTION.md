@@ -24,27 +24,34 @@ This guide covers all production deployment paths for OphthalmoAI: Docker Compos
 - Docker ≥ 24 and Docker Compose v2
 - (Optional) A Kubernetes cluster with `kubectl` and `kustomize`
 - Trained model files in `models/` (see [README — Model Training](README.md#3-model-training))
-- An Anthropic API key **or** Ollama running and accessible
+- A Google Gemini API key **or** Ollama running and accessible
 
 ---
 
 ## Environment Variables
 
-Create a `.env` file in the project root before deploying:
+Create a `.env` file in the project root before deploying (see `.env.example` for the full template):
 
 ```env
 # ── LLM ─────────────────────────────────────────────────────────────────
-ANTHROPIC_API_KEY=sk-ant-...       # Takes priority over Ollama
-OLLAMA_URL=                        # e.g. http://ollama-host:11434
+GEMINI_API_KEY=AIza...                # Takes priority over Ollama
+GEMINI_MODEL=gemini-2.0-flash
+OLLAMA_URL=                           # e.g. http://ollama-host:11434
 OLLAMA_MODEL=llama3.2:3b
 
 # ── Inference ────────────────────────────────────────────────────────────
 FORCE_CPU=false                    # true = disable GPU for PyTorch models
 MODELS_DIR=/app/models             # Container-internal path (do not change for Docker)
+MAX_FILE_SIZE_BYTES=20971520       # Upload size limit enforced by /predict
 
 # ── Server ───────────────────────────────────────────────────────────────
 CORS_ORIGINS=https://yourdomain.com  # Comma-separated; use * for open dev only
+CORS_ALLOW_CREDENTIALS=false         # Must stay false while CORS_ORIGINS=*
 PORT=8000
+
+# ── Rate limiting ───────────────────────────────────────────────────────
+PREDICT_RATE_LIMIT=10/minute
+CHAT_RATE_LIMIT=30/minute
 ```
 
 > **Security:** Never commit `.env` to source control. Use secrets management (Docker secrets, K8s Secrets, Vault) in production.
@@ -96,6 +103,7 @@ services:
     restart: always
     environment:
       CORS_ORIGINS: "https://yourdomain.com"
+      CORS_ALLOW_CREDENTIALS: "false"
       FORCE_CPU: "false"
     deploy:
       resources:
@@ -140,7 +148,7 @@ kubectl create namespace ophthalmoai
 
 kubectl create secret generic ophthalmoai-secrets \
   --namespace ophthalmoai \
-  --from-literal=ANTHROPIC_API_KEY=sk-ant-...
+  --from-literal=GEMINI_API_KEY=AIza...
 ```
 
 ### 3. Apply Manifests
@@ -191,6 +199,12 @@ spec:
 ```
 
 And remove `FORCE_CPU: "true"` from the ConfigMap.
+
+> **Note:** `backend/Dockerfile` installs the **CPU-only** PyTorch wheel by default
+> (`--index-url https://download.pytorch.org/whl/cpu`). The GPU scheduling above has no
+> effect unless you build a separate CUDA-enabled image (e.g. `backend/Dockerfile.gpu`
+> based on an `nvidia/cuda` image with the `cu124` torch wheel). Don't rely on the
+> default `backend/Dockerfile` for GPU inference.
 
 ---
 
@@ -279,10 +293,12 @@ Configured in `k8s/backend-deployment.yaml`:
 | Area | Recommendation |
 |------|---------------|
 | `CORS_ORIGINS` | Set to your exact domain(s) — never use `*` in production |
+| `CORS_ALLOW_CREDENTIALS` | Keep `false` unless `CORS_ORIGINS` is an explicit list (the backend refuses to start with `*` + credentials) |
 | API Key | Store in K8s Secrets or Docker secrets — never in ConfigMaps or images |
 | Container user | Backend and frontend both run as non-root (`appuser` / `nginx`) |
 | `readOnlyRootFilesystem` | Set to `false` for backend (temp files); `true` for frontend |
-| Rate limiting | Add `slowapi` to backend for `/predict` and `/chat` endpoints |
+| Rate limiting | `/predict` and `/chat` are limited via `slowapi` (`PREDICT_RATE_LIMIT`, `CHAT_RATE_LIMIT`) |
+| Upload validation | `/predict` enforces `MAX_FILE_SIZE_BYTES` and an image MIME allow-list |
 | HTTPS | Terminate TLS at the load balancer or Nginx; use Let's Encrypt |
 | Image scanning | Run `docker scout cves` or `trivy image` on both images before pushing |
 | Dependency updates | Run `pip-audit` and `npm audit` regularly |

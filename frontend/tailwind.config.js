@@ -1,4 +1,3 @@
-
 export default {
   content: [
     "./index.html",
@@ -7,7 +6,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['DM Sans', 'sans-serif'],
+        display: ['Sora', 'sans-serif'],
       },
     },
   },

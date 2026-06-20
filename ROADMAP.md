@@ -1,4 +1,4 @@
-# OphthalmoAI — Industrial-Grade Upgrade Roadmap
+# OphthalmoAI — Upgrade Roadmap
 
 **Document scope:** Accuracy improvements, condition expansion, and production-hardening for OphthalmoAI.  
 Each section is ordered by impact-to-effort ratio. Items marked 🔴 are critical blockers for any clinical context.

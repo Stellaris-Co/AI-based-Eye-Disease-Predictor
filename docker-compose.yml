@@ -7,9 +7,13 @@ services:
     environment:
       FORCE_CPU: "${FORCE_CPU:-false}"
       CORS_ORIGINS: "${CORS_ORIGINS:-*}"
+      CORS_ALLOW_CREDENTIALS: "${CORS_ALLOW_CREDENTIALS:-false}"
       OLLAMA_URL: "${OLLAMA_URL:-}"
       OLLAMA_MODEL: "${OLLAMA_MODEL:-llama3.2:3b}"
-      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
+      GEMINI_MODEL: "${GEMINI_MODEL:-gemini-2.0-flash}"
+      PREDICT_RATE_LIMIT: "${PREDICT_RATE_LIMIT:-10/minute}"
+      CHAT_RATE_LIMIT: "${CHAT_RATE_LIMIT:-30/minute}"
     ports:
       - "8000:8000"
     healthcheck:
