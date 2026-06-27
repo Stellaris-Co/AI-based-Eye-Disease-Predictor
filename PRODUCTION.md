@@ -1,4 +1,4 @@
-# Production Deployment Guide
+# OphthalmoAI - Production Deployment Guide
 
 This guide covers all production deployment paths for OphthalmoAI: Docker Compose (single server), and Kubernetes (cluster).
 
@@ -33,23 +33,23 @@ This guide covers all production deployment paths for OphthalmoAI: Docker Compos
 Create a `.env` file in the project root before deploying (see `.env.example` for the full template):
 
 ```env
-# ── LLM ─────────────────────────────────────────────────────────────────
+# LLM
 GEMINI_API_KEY=AIza...                # Takes priority over Ollama
 GEMINI_MODEL=gemini-2.0-flash
 OLLAMA_URL=                           # e.g. http://ollama-host:11434
 OLLAMA_MODEL=llama3.2:3b
 
-# ── Inference ────────────────────────────────────────────────────────────
+# Inference
 FORCE_CPU=false                    # true = disable GPU for PyTorch models
 MODELS_DIR=/app/models             # Container-internal path (do not change for Docker)
 MAX_FILE_SIZE_BYTES=20971520       # Upload size limit enforced by /predict
 
-# ── Server ───────────────────────────────────────────────────────────────
+# Server
 CORS_ORIGINS=https://yourdomain.com  # Comma-separated; use * for open dev only
 CORS_ALLOW_CREDENTIALS=false         # Must stay false while CORS_ORIGINS=*
 PORT=8000
 
-# ── Rate limiting ───────────────────────────────────────────────────────
+# Rate limiting
 PREDICT_RATE_LIMIT=10/minute
 CHAT_RATE_LIMIT=30/minute
 ```
@@ -113,7 +113,7 @@ services:
   frontend:
     restart: always
     ports:
-      - "80:8080"   # serve on port 80 directly
+      - "80:8080"  
 ```
 
 Run with:
@@ -143,7 +143,6 @@ Update `image:` fields in `k8s/backend-deployment.yaml` and `k8s/frontend-deploy
 ### 2. Configure Secrets
 
 ```bash
-# Create secrets from .env values (do not use the example file in production)
 kubectl create namespace ophthalmoai
 
 kubectl create secret generic ophthalmoai-secrets \
@@ -190,7 +189,7 @@ spec:
   template:
     spec:
       nodeSelector:
-        accelerator: nvidia-tesla-t4    # match your node label
+        accelerator: nvidia-tesla-t4    
       containers:
         - name: backend
           resources:
@@ -240,7 +239,6 @@ The backend Docker image **copies `models/` at build time** (see `backend/Docker
 To avoid rebuilding the image on every training run, mount models as a volume:
 
 ```yaml
-# docker-compose.override.yml
 services:
   backend:
     volumes:

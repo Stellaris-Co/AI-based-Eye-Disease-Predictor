@@ -1,0 +1,326 @@
+name: Security Scan
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:        
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: false 
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  bandit:
+    name: SAST · Bandit (Python)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Bandit
+        run: pip install bandit[sarif]
+
+      - name: Run Bandit
+        run: |
+          bandit \
+            --recursive backend/ \
+            --format sarif \
+            --output bandit-results.sarif \
+            --severity-level medium \
+            --confidence-level medium \
+            --exclude backend/tests || true
+
+      - name: Upload Bandit SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: bandit-results.sarif
+          category:   bandit
+
+      - name: Human-readable Bandit summary
+        run: |
+          bandit \
+            --recursive backend/ \
+            --severity-level medium \
+            --confidence-level medium \
+            --exclude backend/tests \
+            --format text || true
+
+  semgrep:
+    name: SAST · Semgrep
+    runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
+
+    container:
+      image: semgrep/semgrep
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep (Python + JS security rulesets)
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+        run: |
+          semgrep \
+            --config "p/python" \
+            --config "p/security-audit" \
+            --config "p/owasp-top-ten" \
+            --config "p/javascript" \
+            --config "p/react" \
+            --sarif \
+            --output semgrep-results.sarif \
+            --error \
+            --quiet \
+            backend/ frontend/src/ || true
+
+      - name: Upload Semgrep SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep-results.sarif
+          category:   semgrep
+
+  trivy-backend:
+    name: Container · Trivy (backend)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend image for scanning
+        uses: docker/build-push-action@v5
+        with:
+          context:  .
+          file:     backend/Dockerfile
+          push:     false
+          tags:     ophthalmoai-backend:scan
+          load:     true
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
+
+      - name: Trivy vulnerability scan — backend
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref:     ophthalmoai-backend:scan
+          format:        sarif
+          output:        trivy-backend.sarif
+          severity:      CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code:     0 
+
+      - name: Upload Trivy SARIF (backend)
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-backend.sarif
+          category:   trivy-backend
+
+  trivy-frontend:
+    name: Container · Trivy (frontend)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build frontend image for scanning
+        uses: docker/build-push-action@v5
+        with:
+          context:  .
+          file:     frontend/Dockerfile
+          push:     false
+          tags:     ophthalmoai-frontend:scan
+          load:     true
+          build-args: VITE_API_URL=/api
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
+
+      - name: Trivy vulnerability scan — frontend
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref:     ophthalmoai-frontend:scan
+          format:        sarif
+          output:        trivy-frontend.sarif
+          severity:      CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code:     0
+
+      - name: Upload Trivy SARIF (frontend)
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-frontend.sarif
+          category:   trivy-frontend
+
+  gitleaks:
+    name: Secret scan · Gitleaks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: detect --source . --verbose --redact
+
+  owasp-dep-check:
+    name: Dependency · OWASP check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.event_name == 'schedule'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project:       OphthalmoAI
+          path:          .
+          format:        HTML,SARIF
+          out:           owasp-report
+          args: >
+            --enableRetired
+            --enableExperimental
+            --failOnCVSS 7
+            --suppression .github/owasp-suppressions.xml
+        continue-on-error: true  
+
+      - name: Upload OWASP SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: owasp-report/dependency-check-report.sarif
+          category:   owasp-dep-check
+
+      - name: Upload OWASP HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owasp-dependency-report
+          path: owasp-report/
+          retention-days: 30
+
+  pip-audit:
+    name: Dependency · pip-audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Audit Python dependencies
+        run: |
+          pip-audit \
+            --requirement backend/requirements.txt \
+            --desc on \
+            --format json \
+            --output pip-audit.json || AUDIT_FAILED=true
+
+          # Pretty-print summary
+          pip-audit \
+            --requirement backend/requirements.txt \
+            --desc on || true
+
+          # Surface the exit code after printing
+          if [ "${AUDIT_FAILED:-false}" = "true" ]; then
+            echo "::warning::pip-audit found vulnerabilities. Review pip-audit.json artefact."
+          fi
+
+      - name: Upload pip-audit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pip-audit-report
+          path: pip-audit.json
+          retention-days: 14
+
+  npm-audit:
+    name: Dependency · npm audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: npm audit (report all, fail on critical)
+        working-directory: frontend
+        run: |
+          npm audit --json > npm-audit.json || true
+          npm audit --audit-level=critical
+
+      - name: Upload npm-audit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: npm-audit-report
+          path: frontend/npm-audit.json
+          retention-days: 14
+
+  summary:
+    name: Security summary
+    runs-on: ubuntu-latest
+    needs:
+      - bandit
+      - semgrep
+      - trivy-backend
+      - trivy-frontend
+      - gitleaks
+      - pip-audit
+      - npm-audit
+    if: always()
+
+    steps:
+      - name: Print summary
+        run: |
+          echo "## Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Scanner | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Bandit (SAST Python)       | ${{ needs.bandit.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Semgrep (SAST multi-lang)  | ${{ needs.semgrep.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trivy backend image        | ${{ needs.trivy-backend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trivy frontend image       | ${{ needs.trivy-frontend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Gitleaks secret scan       | ${{ needs.gitleaks.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| pip-audit                  | ${{ needs.pip-audit.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| npm audit                  | ${{ needs.npm-audit.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Full SARIF results are available in the GitHub Security tab." >> $GITHUB_STEP_SUMMARY

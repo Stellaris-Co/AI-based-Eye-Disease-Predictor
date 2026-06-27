@@ -107,11 +107,11 @@ Input Image (380×380 px)
      ▼              ▼                 ▼
  Adnexal       Anterior           Ocular
  (direct)      Segment            Surface
-               │                  │
-        ┌──────▼─────┐    ┌───────▼──────┐
-        │ EfficientNet│    │ EfficientNet  │
-        │    B4        │    │    B4         │
-        │ 2 classes    │    │ 4 classes     │
+               │                   │
+        ┌──────▼──────┐    ┌───────▼──────┐
+        │ EfficientNet│    │ EfficientNet │
+        │    B4       │    │    B4        │
+        │ 2 classes   │    │ 4 classes    │
         └─────────────┘    └──────────────┘
                 │                  │
                 └────────┬─────────┘
@@ -241,11 +241,11 @@ OphthalmoAI/
 
 | Requirement | Minimum | Recommended |
 |-------------|---------|-------------|
-| Python | 3.10 | 3.11 |
-| Node.js | 18 | 22 |
-| CUDA | 12.1 | 12.4 |
-| GPU VRAM | 4 GB | 6 GB (RTX 3050+) |
-| RAM | 8 GB | 16 GB |
+| Python      | 3.10    | 3.11        |
+| Node.js     | 18      | 22          |
+| CUDA        | 12.1    | 12.4        |
+| GPU VRAM    | 4 GB    | 6 GB (RTX 3050+) |
+| RAM         | 8 GB    | 16 GB       |
 | Disk (dataset + models) | 5 GB | 20 GB |
 
 > **CPU-only mode** is supported but training will be significantly slower (~10–20×). Inference remains usable.
@@ -260,11 +260,8 @@ The fastest way to run OphthalmoAI without setting up Python locally.
 git clone https://github.com/AkashKundu114/Eye-Disease-AI-Diagnosis.git
 cd Eye-Disease-AI-Diagnosis
 
-# Copy and configure environment variables
 cp .env.example .env
-# Edit .env and add GEMINI_API_KEY or OLLAMA_URL
 
-# Build and start both services
 docker compose up --build
 ```
 
@@ -282,7 +279,6 @@ Open **http://localhost:8080** in your browser.
 git clone https://github.com/AkashKundu114/Eye-Disease-AI-Diagnosis.git
 cd Eye-Disease-AI-Diagnosis
 
-# Create and activate virtual environment
 python -m venv venv
 
 # Windows
@@ -380,7 +376,6 @@ python scripts/train_eyelid.py      # Eyelid helper; router handles final routin
 
 ```bash
 cp .env.example .env
-# Then edit .env with your API keys
 ```
 
 **Start the FastAPI server:**
@@ -414,14 +409,12 @@ VITE_API_URL=http://localhost:8000
 
 ```bash
 npm run dev
-# Opens at http://localhost:5173
 ```
 
 **Build for production:**
 
 ```bash
 npm run build
-# Output in frontend/dist/
 ```
 
 ---
@@ -431,7 +424,7 @@ npm run build
 Create a `.env` file in the **project root** (or copy `.env.example`):
 
 ```env
-# ── LLM Chat Backend (choose one) ──────────────────────────────────────
+# LLM Chat Backend (choose one)
 # Option A: Google Gemini (set key, leave OLLAMA_URL blank)
 GEMINI_API_KEY=your-gemini-key-here
 GEMINI_MODEL=gemini-2.0-flash
@@ -440,18 +433,18 @@ GEMINI_MODEL=gemini-2.0-flash
 OLLAMA_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.2:3b
 
-# ── Inference ───────────────────────────────────────────────────────────
+# Inference
 FORCE_CPU=false        # Set to true to disable GPU for inference
 MAX_FILE_SIZE_BYTES=20971520
 
-# ── Server ──────────────────────────────────────────────────────────────
+# Server
 CORS_ORIGINS=*                  # Comma-separated list of allowed origins
 CORS_ALLOW_CREDENTIALS=false    # Must stay false while CORS_ORIGINS=*
 PORT=8000
 HOST=0.0.0.0
 MODELS_DIR=./models    # Path to trained .pth files
 
-# ── Rate limiting (requires slowapi) ──────────────────────────────────────
+# Rate limiting (requires slowapi)
 PREDICT_RATE_LIMIT=10/minute
 CHAT_RATE_LIMIT=30/minute
 ```
