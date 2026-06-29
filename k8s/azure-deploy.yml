@@ -1,0 +1,250 @@
+name: Azure Deploy
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: "Force rebuild even if no code changes"
+        required: false
+        default: "false"
+
+concurrency:
+  group: azure-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "22"
+
+jobs:
+  test:
+    name: Test before deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install CPU-only PyTorch
+        run: |
+          pip install --upgrade pip
+          pip install torch torchvision \
+            --index-url https://download.pytorch.org/whl/cpu --quiet
+
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Install test tools
+        run: pip install pytest pytest-asyncio pytest-cov httpx
+
+      - name: Run backend tests
+        env:
+          ENVIRONMENT: test
+          JWT_SECRET_KEY: ci-test-secret-do-not-use-in-production
+          DATABASE_URL: sqlite:///./test_ophthalmoai.db
+          CORS_ORIGINS: http://localhost:5173
+          FORCE_CPU: "true"
+        run: |
+          pytest tests/backend/ \
+            --tb=short \
+            --cov=backend \
+            --cov-fail-under=60 \
+            -v
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Lint + build frontend
+        working-directory: frontend
+        env:
+          VITE_API_URL: /api
+        run: |
+          npm run lint
+          npm run build
+
+  build-and-push:
+    name: Build & push images to ACR
+    runs-on: ubuntu-latest
+    needs: test
+
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tag }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate image tag
+        id: meta
+        run: |
+          TAG="${{ github.sha }}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Image tag: $TAG"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ACR_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.ACR_SERVER }}/ophthalmoai-backend:${{ steps.meta.outputs.tag }}
+            ${{ secrets.ACR_SERVER }}/ophthalmoai-backend:latest
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: frontend/Dockerfile
+          push: true
+          build-args: VITE_API_URL=/api
+          tags: |
+            ${{ secrets.ACR_SERVER }}/ophthalmoai-frontend:${{ steps.meta.outputs.tag }}
+            ${{ secrets.ACR_SERVER }}/ophthalmoai-frontend:latest
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+      - name: Verify images pushed
+        run: |
+          echo "✅ Backend  : ${{ secrets.ACR_SERVER }}/ophthalmoai-backend:${{ steps.meta.outputs.tag }}"
+          echo "✅ Frontend : ${{ secrets.ACR_SERVER }}/ophthalmoai-frontend:${{ steps.meta.outputs.tag }}"
+
+  deploy:
+    name: Deploy to Azure Container Apps
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install Container Apps CLI extension
+        run: az extension add --name containerapp --upgrade --yes
+
+      - name: Deploy backend
+        run: |
+          az containerapp update \
+            --name ${{ secrets.BACKEND_APP_NAME }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --image ${{ secrets.ACR_SERVER }}/ophthalmoai-backend:${{ needs.build-and-push.outputs.image_tag }}
+
+          echo "Waiting for backend revision to become active..."
+          sleep 30
+
+      - name: Verify backend health
+        run: |
+          BACKEND_FQDN=$(az containerapp show \
+            --name ${{ secrets.BACKEND_APP_NAME }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --query properties.configuration.ingress.fqdn -o tsv)
+
+          echo "Backend FQDN: $BACKEND_FQDN"
+
+          # Poll /health up to 10 times (90 s total)
+          for i in $(seq 1 10); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              "https://$BACKEND_FQDN/health" || echo "000")
+            echo "Attempt $i: HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Backend is healthy"
+              break
+            fi
+            if [ "$i" = "10" ]; then
+              echo "❌ Backend health check failed after 10 attempts"
+              exit 1
+            fi
+            sleep 9
+          done
+
+      - name: Deploy frontend
+        run: |
+          az containerapp update \
+            --name ${{ secrets.FRONTEND_APP_NAME }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --image ${{ secrets.ACR_SERVER }}/ophthalmoai-frontend:${{ needs.build-and-push.outputs.image_tag }}
+
+      - name: Verify frontend
+        run: |
+          FRONTEND_FQDN=$(az containerapp show \
+            --name ${{ secrets.FRONTEND_APP_NAME }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --query properties.configuration.ingress.fqdn -o tsv)
+
+          echo "Frontend FQDN: $FRONTEND_FQDN"
+
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://$FRONTEND_FQDN" || echo "000")
+          echo "Frontend HTTP status: $STATUS"
+
+          if [ "$STATUS" = "200" ]; then
+            echo "✅ Frontend is live"
+          else
+            echo "⚠️  Frontend returned HTTP $STATUS — may still be starting up"
+          fi
+
+      - name: Print deployment summary
+        run: |
+          BACKEND_FQDN=$(az containerapp show \
+            --name ${{ secrets.BACKEND_APP_NAME }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --query properties.configuration.ingress.fqdn -o tsv)
+
+          FRONTEND_FQDN=$(az containerapp show \
+            --name ${{ secrets.FRONTEND_APP_NAME }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --query properties.configuration.ingress.fqdn -o tsv)
+
+          echo ""
+          echo "════════════════════════════════════════════════════════"
+          echo " ✅  Deployment complete — commit ${{ github.sha }}"
+          echo "════════════════════════════════════════════════════════"
+          echo " Frontend  : https://$FRONTEND_FQDN"
+          echo " Backend   : https://$BACKEND_FQDN"
+          echo " Health    : https://$BACKEND_FQDN/health"
+          echo " Triggered : ${{ github.actor }} @ ${{ github.event_name }}"
+          echo "════════════════════════════════════════════════════════"
+
+          # Write to GitHub Step Summary
+          {
+            echo "## ✅ OphthalmoAI Deployed"
+            echo "| | |"
+            echo "|---|---|"
+            echo "| **Frontend** | https://$FRONTEND_FQDN |"
+            echo "| **Backend** | https://$BACKEND_FQDN |"
+            echo "| **Health** | https://$BACKEND_FQDN/health |"
+            echo "| **Image tag** | \`${{ needs.build-and-push.outputs.image_tag }}\` |"
+            echo "| **Triggered by** | ${{ github.actor }} |"
+          } >> $GITHUB_STEP_SUMMARY
