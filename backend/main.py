@@ -3,7 +3,6 @@ from __future__ import annotations
 import gc
 import io
 import os
-import sys
 import warnings
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -47,26 +46,24 @@ except ImportError:
 
 import base64
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from audit import log_event
-from auth import (
+from .audit import log_event
+from .auth import (
     ROLE_HIERARCHY, JWT_SECRET_KEY,
     authenticate_user, create_access_token, decode_token,
     get_current_user, hash_password, require_role, revoke_token,
     oauth2_scheme,
 )
-from calibration import CalibrationRegistry, apply_temperature
-from clinical_codes import get_clinical_code
-from db import (
+from .calibration import CalibrationRegistry, apply_temperature
+from .clinical_codes import get_clinical_code
+from .db import (
     AuditLog, ClinicianOverride, ModelVersion,
     ScanResult, User, create_tables, get_db,
 )
-from iqa import assess_image_quality
-from logging_config import configure_logging, get_logger
-from medical_data import MEDICAL_INFO
-from model_registry import list_versions, set_active
-from security import (
+from .iqa import assess_image_quality
+from .logging_config import configure_logging, get_logger
+from .medical_data import MEDICAL_INFO
+from .model_registry import list_versions, set_active
+from .security import (
     RequestIDMiddleware,
     SecurityHeadersMiddleware,
     anonymise_ip,
@@ -77,9 +74,9 @@ from security import (
     validate_magic_bytes,
     ALLOWED_MIMES,
 )
-from storage import store as storage_store, presigned_url
-from uncertainty import build_review_payload, mc_dropout_predict
-from validators import (
+from .storage import store as storage_store, presigned_url
+from .uncertainty import build_review_payload, mc_dropout_predict
+from .validators import (
     sanitise_chat_message,
     validate_email,
     validate_ollama_url_from_env,

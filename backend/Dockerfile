@@ -7,6 +7,8 @@ ENV OMP_NUM_THREADS=4
 ENV PORT=8000
 ENV MODELS_DIR=/app/models
 ENV FORCE_CPU=true
+ENV ENVIRONMENT=production
+ENV DATABASE_URL=sqlite:////app/data/ophthalmoai.db
 
 WORKDIR /app
 
@@ -20,7 +22,9 @@ RUN pip install --no-cache-dir --upgrade pip \
 COPY backend /app/backend
 COPY models /app/models
 
-RUN useradd --create-home --shell /usr/sbin/nologin appuser && chown -R appuser:appuser /app
+RUN mkdir -p /app/data \
+    && useradd --create-home --shell /usr/sbin/nologin appuser \
+    && chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8000

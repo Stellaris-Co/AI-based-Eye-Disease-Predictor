@@ -9,7 +9,9 @@ npm install
 npm run dev
 ```
 
-The app expects the backend on `http://localhost:8000` unless `VITE_API_URL` is set.
+The app calls `/api` by default. In development, Vite proxies `/api` to
+`http://localhost:8000`; in production, Nginx proxies `/api` to the backend
+container. Set `VITE_API_URL` only when deploying the frontend separately.
 
 ## Useful commands
 

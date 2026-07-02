@@ -5,17 +5,36 @@ services:
       dockerfile: backend/Dockerfile
     image: ophthalmoai-backend:latest
     environment:
+      ENVIRONMENT: "${ENVIRONMENT:-production}"
       FORCE_CPU: "${FORCE_CPU:-false}"
-      CORS_ORIGINS: "${CORS_ORIGINS:-*}"
+      MODELS_DIR: "${MODELS_DIR:-/app/models}"
+      DATABASE_URL: "${DATABASE_URL:-sqlite:////app/data/ophthalmoai.db}"
+      JWT_SECRET_KEY: "${JWT_SECRET_KEY:?Set JWT_SECRET_KEY to a random production secret. Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\"}"
+      JWT_ALGORITHM: "${JWT_ALGORITHM:-HS256}"
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: "${JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-480}"
+      CORS_ORIGINS: "${CORS_ORIGINS:?Set CORS_ORIGINS to your production origin, for example https://yourdomain.com}"
       CORS_ALLOW_CREDENTIALS: "${CORS_ALLOW_CREDENTIALS:-false}"
+      MAX_FILE_SIZE_BYTES: "${MAX_FILE_SIZE_BYTES:-20971520}"
+      MAX_IMAGE_PIXELS: "${MAX_IMAGE_PIXELS:-89478485}"
       OLLAMA_URL: "${OLLAMA_URL:-}"
       OLLAMA_MODEL: "${OLLAMA_MODEL:-llama3.2:3b}"
       GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
       GEMINI_MODEL: "${GEMINI_MODEL:-gemini-2.0-flash}"
       PREDICT_RATE_LIMIT: "${PREDICT_RATE_LIMIT:-10/minute}"
       CHAT_RATE_LIMIT: "${CHAT_RATE_LIMIT:-30/minute}"
+      AUTH_RATE_LIMIT: "${AUTH_RATE_LIMIT:-20/minute}"
+      MC_DROPOUT_PASSES: "${MC_DROPOUT_PASSES:-8}"
+      ENABLE_UNCERTAINTY: "${ENABLE_UNCERTAINTY:-true}"
+      ENABLE_IQA: "${ENABLE_IQA:-true}"
+      PERSIST_SCANS: "${PERSIST_SCANS:-true}"
+      MODEL_REGISTRY_JSON: "${MODEL_REGISTRY_JSON:-/app/models/registry.json}"
+      SCAN_STORAGE_BUCKET: "${SCAN_STORAGE_BUCKET:-}"
+      SCAN_STORAGE_KMS_KEY_ID: "${SCAN_STORAGE_KMS_KEY_ID:-}"
+      AWS_REGION: "${AWS_REGION:-us-east-1}"
     ports:
       - "8000:8000"
+    volumes:
+      - backend-data:/app/data
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
       interval: 30s
@@ -41,3 +60,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+volumes:
+  backend-data:

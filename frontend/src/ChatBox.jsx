@@ -141,7 +141,7 @@ const ChatBot = ({ diagnosisContext }) => {
         content: `Hello! I can see your AI screening detected **${diagnosisContext.diagnosis}** with ${diagnosisContext.confidence?.toFixed(1)}% confidence. What would you like to know?`,
       }])
     }
-  }, [diagnosisContext?.diagnosis])
+  }, [diagnosisContext])
 
   const handleInputChange = useCallback((e) => {
     const val = e.target.value
@@ -170,7 +170,7 @@ const ChatBot = ({ diagnosisContext }) => {
     setLoading(true)
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || ''
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
 
       const historyToSend = messages
         .slice(1)                         

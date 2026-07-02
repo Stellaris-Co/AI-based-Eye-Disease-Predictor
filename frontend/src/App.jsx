@@ -16,7 +16,7 @@ import {
   ChevronLeft, Star, Clock, Tag
 } from 'lucide-react'
 import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
+import 'jspdf-autotable'
 import ChatBot from './ChatBox'
 
 const ACCENT = '#0891B2'
@@ -405,7 +405,7 @@ const ConditionsPage = () => {
 
   useEffect(() => {
     let cancelled = false
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const apiUrl = import.meta.env.VITE_API_URL || '/api'
     axios.get(`${apiUrl}/conditions`)
       .then(({ data }) => {
         if (cancelled) return
@@ -758,7 +758,7 @@ const DiagnosticPage = () => {
     formData.append('floaters', spots)
     formData.append('duration', duration)
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
       const { data } = await axios.post(`${apiUrl}/predict`, formData)
       if (data.error) throw new Error(data.error)
       setResult(data)
